@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { startAuthentication } from "@simplewebauthn/browser";
 import { AuthShell, PasswordField } from "@/components/AuthShell";
 import { ICONS } from "@/components/nav";
@@ -28,6 +28,14 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [step, setStep] = useState<"password" | "passkey">("password");
+
+  // Coming from the sign-on box on the home page: keep what was entered there.
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    const e = q.get("email");
+    if (e) { setEmail(e); document.getElementById("li-pw")?.focus(); }
+    if (q.get("remember") === "1") setRemember(true);
+  }, []);
 
   async function usePasskey() {
     setBusy(true); setError("");

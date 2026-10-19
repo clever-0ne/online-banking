@@ -1,347 +1,282 @@
-import { existsSync } from "node:fs";
-import path from "node:path";
 import Link from "next/link";
-import { Aurora } from "@/components/landing/Aurora";
-import { LandingMotion } from "@/components/landing/LandingMotion";
+import { HeroSignOn } from "@/components/landing/HeroSignOn";
 import { LogoMark } from "@/components/Logo";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { currentUser } from "@/lib/server/current";
 import "./landing.css";
 
 export const dynamic = "force-dynamic";
 
-const ico = (d: React.ReactNode) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{d}</svg>
-);
-const I = {
-  send: ico(<><path d="M21 3 10 14" /><path d="M21 3l-7 18-4-7-7-4z" /></>),
-  chart: ico(<path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />),
-  card: ico(<><rect x="2.5" y="5" width="19" height="14" rx="2.5" /><path d="M2.5 10h19" /></>),
-  bill: ico(<><rect x="4" y="3" width="16" height="18" rx="2" /><path d="M8 8h8M8 12h8M8 16h4" /></>),
-  goal: ico(<><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="4" /></>),
-  check: ico(<><rect x="3" y="6" width="18" height="12" rx="2" /><path d="M7 14h6M16 10h1" /></>),
-  lock: ico(<><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></>),
-  key: ico(<><circle cx="8" cy="15" r="4" /><path d="M11 12l9-9M17 6l3 3" /></>),
-  eye: ico(<><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" /><circle cx="12" cy="12" r="3" /></>),
-  bell: ico(<><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z" /><path d="M10 20a2 2 0 0 0 4 0" /></>),
-  tick: ico(<path d="M5 12.5l4.5 4.5L19 7.5" />),
-  arrow: ico(<path d="M5 12h14M13 6l6 6-6 6" />),
+/** Free-licence photos from Unsplash, served by their image CDN at the size each slot needs. */
+const photo = (id: string, w: number, h?: number) =>
+  `https://images.unsplash.com/photo-${id}?w=${w}${h ? `&h=${h}` : ""}&fit=crop&q=75&auto=format`;
+const PHOTOS = {
+  hero: "1556742049-0cfed4f6a45d", // shop owner taking a phone payment
+  checking: "1563013544-824ae1b704d3", // paying online with a card
+  savings: "1579621970563-ebec7560ff3e", // seedling growing from coins
+  card: "1556745757-8d76bdb6984b", // card payment at a counter
+  deposit: "1571867424488-4565932edb41", // two phones paying each other
+  help: "1551836022-d5d88e9218df", // a conversation across a table
 };
 
-const MARQUEE = ["Instant transfers", "No monthly fees", "3.75% APY savings", "Card lock in one tap", "Bill pay & autopay", "Mobile check deposit", "Spending insights", "Savings goals", "Credit score tracking", "Real-time alerts"];
+const ico = (d: React.ReactNode) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{d}</svg>
+);
+const I = {
+  checking: ico(<><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 10h18M7 15h4" /></>),
+  savings: ico(<><path d="M19 9c1.5.5 2 2 2 3s-.5 2-2 2v3h-3l-1-2H9l-1 2H5v-3.5C3.5 12.5 3 11 3 10c0-3 3.5-5 8-5 2.5 0 4.5.6 6 1.7L19 5v4z" /><circle cx="15.5" cy="10" r=".6" fill="currentColor" /></>),
+  card: ico(<><rect x="2.5" y="5" width="19" height="14" rx="2.5" /><path d="M2.5 10h19M6 15h3" /></>),
+  deposit: ico(<><path d="M12 3v12M7 10l5 5 5-5" /><path d="M4 21h16" /></>),
+  withdraw: ico(<><path d="M12 15V3M7 8l5-5 5 5" /><path d="M4 21h16" /></>),
+  send: ico(<><path d="M21 3 10 14" /><path d="M21 3l-7 18-4-7-7-4z" /></>),
+  shield: ico(<><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" /><path d="M9 12l2 2 4-4" /></>),
+  bell: ico(<><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z" /><path d="M10 20a2 2 0 0 0 4 0" /></>),
+  lock: ico(<><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></>),
+  key: ico(<><circle cx="8" cy="15" r="4" /><path d="M11 12l9-9M17 6l3 3" /></>),
+  phone: ico(<><rect x="7" y="2" width="10" height="20" rx="2" /><path d="M11 18h2" /></>),
+  chev: ico(<path d="M9 6l6 6-6 6" />),
+  tick: ico(<path d="M5 12.5l4.5 4.5L19 7.5" />),
+};
 
-const FAQ = [
-  ["How long does opening an account take?", "About a minute. You need your name, email, a mobile number and a password. Your checking and savings accounts open right away."],
-  ["What does it cost?", "Everyday is free with no monthly fee. Plus adds a higher savings rate and extras for $6 a month. You can switch any time."],
-  ["How is my account protected?", "Passwords are hashed and never stored in plain text, sessions use signed cookies your browser's scripts can't read, and repeated wrong passwords pause sign-in."],
-  ["Can I lock my card if I lose it?", "Yes. Turn any card off instantly from Cards, block online or international use, set daily limits, or report it lost to get a new number."],
-  ["How do I add money?", "Deposit a check from the app, or move money in from an account you have at another bank. Your balance updates as soon as it clears."],
-  ["Can I close my account?", "Yes, any time, at no cost. Contact support and we’ll walk you through moving your money out."],
+const FAQ: [string, string][] = [
+  ["How do I open an account?", "Select Open an account and enter your name, email, mobile number and a password. It takes about a minute, and your checking, savings and card are ready right away."],
+  ["Are there monthly fees?", "No. Everyday Checking and High-Yield Savings have no monthly service fee and no minimum balance."],
+  ["How do I add money?", "Go to Deposit. You can buy with your debit or credit card through our partner Ramp, or send from your own wallet. Each deposit is reviewed by our team, then added to your balance."],
+  ["How do withdrawals work?", "Go to Withdraw, enter your wallet address and the amount. We hold the amount while our team reviews it, then send it. If a withdrawal is declined, the hold is released right away."],
+  ["How is my account protected?", "Add a passkey in Profile and every sign-in also needs your fingerprint, face or device PIN. You can lock your card in one tap and get notified about sign-ins, deposits and withdrawals."],
+  ["Can I use Anchor on my phone?", "Yes. Open Anchor Bank in your phone's browser and add it to your Home Screen. It opens full-screen like any other app and can send you notifications."],
 ];
 
 export default async function Landing() {
   const user = await currentUser();
-  const hasVideo = existsSync(path.join(process.cwd(), "public", "videos", "hero.mp4"));
-  const primaryHref = user ? "/dashboard" : "/signup";
-  const words = ["Banking", "that", "moves", "at", "your", "speed."];
+  const signedIn = !!user;
+  const open = signedIn ? "/dashboard" : "/signup";
+  const go = (path: string) => (signedIn ? path : "/signup");
 
   return (
-    <div className="lp">
-      <LandingMotion />
-      <div className="lp-progress" aria-hidden="true" />
+    <div className="wf">
+      <a className="wf-skip" href="#main">Skip to content</a>
 
-      {/* ---------- Nav ---------- */}
-      <header className="lp-nav">
-        <div className="lp-nav-in">
-          <Link href="/" className="lp-brand"><LogoMark size={32} /><span>Anchor</span></Link>
-          <nav className="lp-links" aria-label="Sections">
-            <a href="#features">Features</a>
-            <a href="#how">How it works</a>
-            <a href="#security">Security</a>
-            <a href="#pricing">Pricing</a>
-            <a href="#faq">FAQ</a>
+      {/* Utility bar */}
+      <div className="wf-util">
+        <div className="wf-wrap wf-util-in">
+          <nav aria-label="Banking for">
+            <a href="#" aria-current="page">Personal</a>
           </nav>
-          <div className="lp-cta">
-            <ThemeToggle />
-            {user ? (
-              <Link className="btn small" href="/dashboard">Go to dashboard</Link>
+          <nav aria-label="Help" className="wf-util-end">
+            <a href="#security">Security center</a>
+            <a href="#help">Help</a>
+            <a href="#app">Get the app</a>
+          </nav>
+        </div>
+      </div>
+
+      {/* Masthead */}
+      <header className="wf-mast">
+        <div className="wf-wrap wf-mast-in">
+          <Link href="/" className="wf-brand" aria-label="Anchor Bank home"><LogoMark size={34} /><span>Anchor Bank</span></Link>
+          <nav className="wf-nav" aria-label="Main">
+            <a href="#accounts">Checking</a>
+            <a href="#accounts">Savings</a>
+            <a href="#accounts">Credit cards</a>
+            <a href="#deposit">Deposit &amp; withdraw</a>
+            <a href="#security">Security</a>
+          </nav>
+          <div className="wf-mast-end">
+            {signedIn ? (
+              <Link className="wf-btn wf-btn-light" href="/dashboard">My accounts</Link>
             ) : (
               <>
-                <Link className="lp-signin" href="/login">Sign in</Link>
-                <Link className="btn small shine" href="/signup">Open account</Link>
+                <Link className="wf-btn wf-btn-ghost" href="/login">Sign on</Link>
+                <Link className="wf-btn wf-btn-light" href="/signup">Open account</Link>
               </>
             )}
           </div>
         </div>
       </header>
 
-      {/* ---------- Hero ---------- */}
-      <section className="lp-hero">
-        <div className="hero-media" aria-hidden="true">
-          <Aurora />
-          {hasVideo && <video className="hero-video" src="/videos/hero.mp4" autoPlay muted loop playsInline preload="auto" />}
-          <div className="hero-grid" />
-          <div className="hero-vignette" />
-        </div>
-
-        <div className="lp-wrap hero-in">
-          <div className="hero-copy">
-            <span className="lp-tag" data-reveal><span className="tag-dot" />New · Instant transfers with no fees</span>
-            <h1 className="hero-title" aria-label={words.join(" ")}>
-              {words.map((w, i) => (
-                <span key={i} className={`word${i >= 2 ? " grad" : ""}`} style={{ animationDelay: `${150 + i * 90}ms` }} aria-hidden="true">{w}&nbsp;</span>
-              ))}
-            </h1>
-            <p className="hero-sub" data-reveal data-delay="500">Checking, savings, cards and payments in one calm place. Open an account in a minute, send money in seconds, and see exactly where it goes.</p>
-            <div className="hero-actions" data-reveal data-delay="650">
-              <Link className="btn big shine" href={primaryHref}>{user ? "Open your dashboard" : "Open a free account"}{I.arrow}</Link>
-              {!user && <Link className="btn ghost big" href="/login">Sign in</Link>}
+      <main id="main">
+        {/* Hero */}
+        <section className="wf-hero" aria-label="Welcome">
+          <img className="wf-hero-img" src={photo(PHOTOS.hero, 1920)} srcSet={`${photo(PHOTOS.hero, 960)} 960w, ${photo(PHOTOS.hero, 1920)} 1920w`} sizes="100vw" alt="A smiling shop owner taking a customer's payment by phone" fetchPriority="high" />
+          <div className="wf-wrap wf-hero-in">
+            <HeroSignOn name={user?.name ?? null} />
+            <div className="wf-hero-copy">
+              <p className="wf-eyebrow">Everyday Checking</p>
+              <h1>Banking that works as hard as you do</h1>
+              <p>Open an account in about a minute. No monthly fee, no minimum balance.</p>
+              <Link className="wf-btn wf-btn-primary" href={open}>{signedIn ? "Go to your accounts" : "Open an account"}</Link>
             </div>
-            <ul className="hero-points" data-reveal data-delay="800">
-              <li>{I.tick}No monthly fees</li><li>{I.tick}3.75% APY savings</li><li>{I.tick}Card lock in one tap</li>
-            </ul>
           </div>
+        </section>
 
-          <div className="hero-device" data-reveal data-delay="300">
-            <div className="device-glow" aria-hidden="true" />
-            <div className="phone" data-tilt aria-hidden="true">
-              <div className="phone-notch" />
-              <div className="phone-head"><span className="ph-av">JE</span><div><small>Welcome back,</small><b>Jordan</b></div></div>
-              <div className="phone-card">
-                <span>Current balance</span>
-                <b data-count="6743.38" data-decimals="2" data-prefix="$">$6,743.38</b>
-                <span className="pan">•••• •••• •••• 4417</span>
-              </div>
-              <div className="phone-actions">{["Top up", "Send", "Request", "More"].map((a) => <span key={a}><i />{a}</span>)}</div>
-              <div className="phone-rows">
-                {[["Northwind Logistics", "+$2,486.12", true], ["Whole Foods", "−$73.81", false], ["Spotify", "−$11.99", false]].map(([n, a, pos], k) => (
-                  <div key={n as string} style={{ animationDelay: `${900 + k * 140}ms` }}><i /><span>{n}</span><b className={pos ? "pos" : ""}>{a}</b></div>
+        {/* Shortcuts */}
+        <nav className="wf-shortcuts" aria-label="What would you like to do?">
+          <div className="wf-wrap wf-shortcuts-in">
+            {[
+              ["Checking", I.checking, go("/dashboard")],
+              ["Savings", I.savings, go("/goals")],
+              ["Credit cards", I.card, go("/cards")],
+              ["Deposit", I.deposit, go("/deposit")],
+              ["Withdraw", I.withdraw, go("/withdraw")],
+              ["Send money", I.send, go("/send")],
+            ].map(([label, icon, href]) => (
+              <Link key={label as string} href={href as string} className="wf-shortcut">
+                <span className="wf-shortcut-ico">{icon}</span>
+                <span>{label as string}</span>
+              </Link>
+            ))}
+          </div>
+        </nav>
+
+        {/* Accounts */}
+        <section id="accounts" className="wf-section">
+          <div className="wf-wrap">
+            <div className="wf-head">
+              <h2>Find the account that fits</h2>
+              <p>Everything you need for everyday money, all in one place.</p>
+            </div>
+            <div className="wf-cards">
+              <article className="wf-card">
+                <img src={photo(PHOTOS.checking, 720, 400)} alt="Someone paying online with a card" loading="lazy" />
+                <div className="wf-card-body">
+                  <h3>Everyday Checking</h3>
+                  <p>The account for daily spending, bills and transfers.</p>
+                  <ul className="wf-ticks">
+                    <li>{I.tick}No monthly service fee</li>
+                    <li>{I.tick}Free debit card with one-tap lock</li>
+                    <li>{I.tick}Bill pay and scheduled transfers</li>
+                  </ul>
+                  <Link className="wf-link" href={open}>Open checking {I.chev}</Link>
+                </div>
+              </article>
+              <article className="wf-card">
+                <img src={photo(PHOTOS.savings, 720, 400)} alt="A seedling growing from a pile of coins" loading="lazy" />
+                <div className="wf-card-body">
+                  <h3>High-Yield Savings</h3>
+                  <p>Grow your money and track savings goals as you go.</p>
+                  <ul className="wf-ticks">
+                    <li>{I.tick}<b>3.75% APY</b>&nbsp;on every dollar</li>
+                    <li>{I.tick}No minimum balance</li>
+                    <li>{I.tick}Savings goals with progress</li>
+                  </ul>
+                  <Link className="wf-link" href={open}>Start saving {I.chev}</Link>
+                </div>
+              </article>
+              <article className="wf-card">
+                <img src={photo(PHOTOS.card, 720, 400)} alt="A card payment at a shop counter" loading="lazy" />
+                <div className="wf-card-body">
+                  <h3>Cash Back Visa</h3>
+                  <p>A credit card you manage right next to your accounts.</p>
+                  <ul className="wf-ticks">
+                    <li>{I.tick}Lock, unlock and set limits instantly</li>
+                    <li>{I.tick}Turn online or abroad use on and off</li>
+                    <li>{I.tick}Pay your balance from checking</li>
+                  </ul>
+                  <Link className="wf-link" href={open}>See the card {I.chev}</Link>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        {/* Deposit & withdraw */}
+        <section id="deposit" className="wf-split">
+          <div className="wf-wrap wf-split-in">
+            <img src={photo(PHOTOS.deposit, 960, 720)} alt="Two people paying each other with their phones" loading="lazy" />
+            <div className="wf-split-copy">
+              <p className="wf-eyebrow">Deposit &amp; withdraw</p>
+              <h2>Add money with your card in minutes</h2>
+              <p>Buy with your debit or credit card through our partner Ramp, or send from your own wallet. Withdraw to your wallet whenever you like.</p>
+              <ul className="wf-ticks">
+                <li>{I.tick}Every deposit and withdrawal is reviewed by our team</li>
+                <li>{I.tick}See each request&apos;s status as it happens</li>
+                <li>{I.tick}Get notified the moment it&apos;s approved</li>
+              </ul>
+              <Link className="wf-btn wf-btn-primary" href={go("/deposit")}>Make a deposit</Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Security */}
+        <section id="security" className="wf-section wf-tint">
+          <div className="wf-wrap">
+            <div className="wf-head">
+              <h2>Security that works in the background</h2>
+              <p>Your account is protected at every step, and you stay in control.</p>
+            </div>
+            <div className="wf-features">
+              {[
+                [I.key, "Passkey sign-in", "Add a passkey and every sign-in also needs your fingerprint, face or device PIN."],
+                [I.bell, "Instant alerts", "Get notified about sign-ins, deposits, withdrawals and security changes."],
+                [I.lock, "Card controls", "Lock your card, block online or international use, and set spending limits."],
+                [I.shield, "Protected sign-on", "Encrypted sessions, and sign-in pauses after repeated wrong passwords."],
+              ].map(([icon, t, d]) => (
+                <div className="wf-feature" key={t as string}>
+                  <span className="wf-feature-ico">{icon}</span>
+                  <h3>{t as string}</h3>
+                  <p>{d as string}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* App */}
+        <section id="app" className="wf-section">
+          <div className="wf-wrap wf-app">
+            <div className="wf-app-icon"><img src="/icon-512.png" alt="" width={120} height={120} /></div>
+            <div className="wf-app-copy">
+              <h2>Take Anchor with you</h2>
+              <p>Add Anchor Bank to your phone&apos;s Home Screen. It opens full-screen like any other app and can notify you about your money.</p>
+              <ol className="wf-steps">
+                <li><b>iPhone:</b> open this site in Safari, tap Share, then Add to Home Screen.</li>
+                <li><b>Android:</b> open it in Chrome, tap the menu, then Install app.</li>
+              </ol>
+            </div>
+            <span className="wf-app-phone" aria-hidden="true">{I.phone}</span>
+          </div>
+        </section>
+
+        {/* Help */}
+        <section id="help" className="wf-split wf-tint">
+          <div className="wf-wrap wf-split-in wf-split-rev">
+            <img src={photo(PHOTOS.help, 960, 720)} alt="Two people talking across a table" loading="lazy" />
+            <div className="wf-split-copy">
+              <h2>Questions? We&apos;re here to help</h2>
+              <div className="wf-faq">
+                {FAQ.map(([q, a]) => (
+                  <details key={q}>
+                    <summary>{q}{I.chev}</summary>
+                    <p>{a}</p>
+                  </details>
                 ))}
               </div>
             </div>
-            <div className="float-chip glass one" data-parallax="-0.06"><span className="chip-ico ok">{I.tick}</span><div><b>Sent $25.00</b><small>to Maya · just now</small></div></div>
-            <div className="float-chip glass two" data-parallax="-0.12"><span className="chip-ico">{I.chart}</span><div><b>Credit score 742</b><small>Up 38 points this year</small></div></div>
-            <div className="float-chip glass three" data-parallax="-0.03"><span className="chip-ico lock">{I.lock}</span><div><b>Card locked</b><small>Debit ••4417</small></div></div>
-          </div>
-        </div>
-
-        <a className="scroll-cue" href="#features" aria-label="Scroll to features"><span /></a>
-      </section>
-
-      {/* ---------- Marquee ---------- */}
-      <div className="marquee" aria-hidden="true">
-        <div className="marquee-track">
-          {[...MARQUEE, ...MARQUEE].map((m, i) => <span key={i}><LogoMark size={18} />{m}</span>)}
-        </div>
-      </div>
-
-      <main className="lp-wrap lp-main">
-        {/* ---------- Stats ---------- */}
-        <section className="lp-stats glass" data-reveal>
-          <div><b data-count="60" data-suffix=" sec">60 sec</b><span>to open an account</span></div>
-          <div><b data-count="0" data-prefix="$">$0</b><span>monthly fees on Everyday</span></div>
-          <div><b data-count="3.75" data-decimals="2" data-suffix="%">3.75%</b><span>APY on savings</span></div>
-          <div><b data-count="24" data-suffix="/7">24/7</b><span>card controls</span></div>
-        </section>
-
-        {/* ---------- Features ---------- */}
-        <section id="features" className="lp-section">
-          <div className="sec-intro" data-reveal>
-            <span className="eyebrow">Features</span>
-            <h2>Everything your bank should do. <span className="grad-text">Nothing it shouldn&apos;t.</span></h2>
-            <p>One app for everyday money, from the paycheck to the bills to the trip you&apos;re saving for.</p>
-          </div>
-          <div className="bento-lp">
-            <article className="fcard spot wide" data-reveal>
-              <div className="fcard-copy"><span className="f-ico">{I.send}</span><h3>Send money in seconds</h3><p>Pay friends with just an email or mobile number. Get a receipt you can share.</p></div>
-              <div className="viz viz-send" aria-hidden="true"><span className="av a">JE</span><span className="track"><i /></span><span className="av b">MC</span><span className="amt">$25.00</span></div>
-            </article>
-            <article className="fcard spot" data-reveal data-delay="80">
-              <span className="f-ico">{I.chart}</span><h3>See where it goes</h3><p>Spending by category and cash-flow charts that update as you spend.</p>
-              <div className="viz viz-bars" aria-hidden="true">{[48, 72, 56, 90, 64, 80, 40].map((h, i) => <i key={i} style={{ "--h": `${h}%`, animationDelay: `${i * 90}ms` } as React.CSSProperties} />)}</div>
-            </article>
-            <article className="fcard spot" data-reveal data-delay="160">
-              <span className="f-ico">{I.card}</span><h3>Card controls</h3><p>Turn a card off, block online or international use, set daily limits.</p>
-              <div className="viz viz-toggle" aria-hidden="true"><span className="mini-card" /><span className="tgl"><i /></span></div>
-            </article>
-            <article className="fcard spot" data-reveal>
-              <span className="f-ico">{I.bill}</span><h3>Bills on autopilot</h3><p>Schedule one-time or monthly payments and get a heads-up first.</p>
-              <div className="viz viz-cal" aria-hidden="true">{["1", "5", "12", "18", "22", "28"].map((d, i) => <span key={d} className={i === 3 ? "on" : ""}>{d}</span>)}</div>
-            </article>
-            <article className="fcard spot" data-reveal data-delay="80">
-              <span className="f-ico">{I.goal}</span><h3>Savings goals</h3><p>Set money aside for what matters and see what to save each month.</p>
-              <div className="viz viz-ring" aria-hidden="true"><svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="26" /><circle className="prog" cx="32" cy="32" r="26" pathLength={100} /></svg><b>80%</b></div>
-            </article>
-            <article className="fcard spot wide" data-reveal>
-              <div className="fcard-copy"><span className="f-ico">{I.check}</span><h3>Deposit and withdraw</h3><p>Add money with a card or from your own wallet, and withdraw to it. Every request is reviewed by our team.</p></div>
-              <div className="viz viz-scan" aria-hidden="true"><span className="chq"><i /><i /><i /></span><span className="beam" /></div>
-            </article>
-            <article className="fcard spot" data-reveal data-delay="120">
-              <span className="f-ico">{I.bell}</span><h3>Real-time alerts</h3><p>Large purchases, deposits and low balances, the moment they happen.</p>
-              <div className="viz viz-alerts" aria-hidden="true">
-                <span className="note n1"><i className="ok" />Deposit · +$2,486.12</span>
-                <span className="note n2"><i />Large purchase · $182.28</span>
-                <span className="note n3"><i className="warn" />Low balance alert</span>
-              </div>
-            </article>
           </div>
         </section>
 
-        {/* ---------- Showcase ---------- */}
-        <section className="lp-section showcase">
-          <div className="sec-intro" data-reveal>
-            <span className="eyebrow">The app</span>
-            <h2>Built for the way you <span className="grad-text">actually use money.</span></h2>
-          </div>
-          <div className="show-grid">
-            <div className="show-steps">
-              {[
-                ["See everything at a glance", "Balances, upcoming bills, budgets and your credit score on one dashboard, in light or dark."],
-                ["Pay anyone in three taps", "Pick a person, type the amount on the keypad, send. A receipt is ready to share."],
-                ["Stay in control", "Lock a card the moment something looks off. Unlock it just as fast."],
-              ].map(([t, d], i) => (
-                <div key={t} className={`show-step${i === 0 ? " active" : ""}`} data-step={i}>
-                  <span className="step-n">0{i + 1}</span>
-                  <h3>{t}</h3>
-                  <p>{d}</p>
-                </div>
-              ))}
-            </div>
-            <div className="show-device" data-showcase="0">
-              <div className="phone big" aria-hidden="true">
-                <div className="phone-notch" />
-                <div className="screen s0">
-                  <div className="phone-card"><span>Available</span><b>$25,218.71</b><span className="pan">Checking · Savings</span></div>
-                  <div className="mini-bars">{[30, 55, 40, 75, 50, 85, 60, 70].map((h, i) => <i key={i} style={{ height: `${h}%` }} />)}</div>
-                  <div className="phone-rows"><div><i /><span>Rent · Nov 1</span><b>$1,850</b></div><div><i /><span>Xfinity · Nov 18</span><b>$79.99</b></div></div>
-                </div>
-                <div className="screen s1">
-                  <div className="recip"><span className="ph-av">MC</span><div><b>Maya Chen</b><small>maya.chen@example.com</small></div></div>
-                  <div className="lp-amt">$25.00</div>
-                  <div className="lp-pad">{["1", "2", "3", "4", "5", "6", "7", "8", "9", "00", "0", "⌫"].map((k) => <span key={k}>{k}</span>)}</div>
-                  <div className="send-btn">Send Money</div>
-                </div>
-                <div className="screen s2">
-                  <div className="lock-card"><span>Anchor debit</span><b>•••• 4417</b><span className="lock-badge">{I.lock}Locked</span></div>
-                  <div className="ctrl"><span>Online purchases</span><i className="lsw off" /></div>
-                  <div className="ctrl"><span>International</span><i className="lsw off" /></div>
-                  <div className="ctrl"><span>Tap to pay</span><i className="lsw" /></div>
-                  <div className="report-btn">Report lost or stolen</div>
-                  <div className="phone-rows"><div><i /><span>Declined · Online store</span><b>$129.00</b></div><div><i /><span>Spotify · Oct 15</span><b>$11.99</b></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ---------- How it works ---------- */}
-        <section id="how" className="lp-section">
-          <div className="sec-intro" data-reveal>
-            <span className="eyebrow">How it works</span>
-            <h2>Open an account in <span className="grad-text">about a minute.</span></h2>
-          </div>
-          <ol className="how">
-            {[
-              ["Tell us about you", "Name, email and mobile number. That's it."],
-              ["Set a strong password", "We check it as you type and store only a secure hash."],
-              ["Start banking", "Your dashboard is ready. Add money and you’re set."],
-            ].map(([t, d], i) => (
-              <li key={t} className="how-step glass spot" data-reveal data-delay={String(i * 120)}>
-                <span className="how-n">{i + 1}</span>
-                <h3>{t}</h3>
-                <p>{d}</p>
-              </li>
-            ))}
-          </ol>
-        </section>
-
-        {/* ---------- Security ---------- */}
-        <section id="security" className="lp-section sec-block glass" data-reveal>
-          <div className="shield-viz" aria-hidden="true">
-            <span className="orbit o1" /><span className="orbit o2" /><span className="orbit o3" />
-            <LogoMark size={120} />
-          </div>
-          <div>
-            <span className="eyebrow">Security</span>
-            <h2>Protected at every step.</h2>
-            <p className="muted">Your dashboard only opens after you sign in, and every request is checked again on the server.</p>
-            <ul className="sec-grid">
-              <li><span className="f-ico">{I.key}</span><div><b>Hashed passwords</b><span>Stored with scrypt and a unique salt, never in plain text.</span></div></li>
-              <li><span className="f-ico">{I.lock}</span><div><b>Signed sessions</b><span>An httpOnly cookie that page scripts can&apos;t read.</span></div></li>
-              <li><span className="f-ico">{I.eye}</span><div><b>Lockout on guessing</b><span>Five wrong passwords pause sign-in for a minute.</span></div></li>
-              <li><span className="f-ico">{I.bell}</span><div><b>Instant alerts</b><span>Large purchases, new devices and low balances, as they happen.</span></div></li>
-            </ul>
-          </div>
-        </section>
-
-        {/* ---------- Pricing ---------- */}
-        <section id="pricing" className="lp-section">
-          <div className="sec-intro" data-reveal>
-            <span className="eyebrow">Pricing</span>
-            <h2>Simple plans. <span className="grad-text">No surprises.</span></h2>
-          </div>
-          <div className="plans">
-            <article className="plan glass spot" data-reveal>
-              <h3>Everyday</h3>
-              <p className="muted">All the essentials.</p>
-              <div className="price"><b>$0</b><span>/month</span></div>
-              <ul>{["Checking and savings", "3.75% APY on savings", "Debit card with full controls", "Send money and bill pay", "Budgets and goals"].map((f) => <li key={f}>{I.tick}{f}</li>)}</ul>
-              <Link className="btn ghost wide" href={primaryHref}>Get Everyday</Link>
-            </article>
-            <article className="plan glass spot featured" data-reveal data-delay="120">
-              <span className="plan-tag">Most popular</span>
-              <h3>Plus</h3>
-              <p className="muted">For people who want more from their money.</p>
-              <div className="price"><b>$6</b><span>/month</span></div>
-              <ul>{["Everything in Everyday", "4.25% APY on savings", "Cash Back Visa at 2%", "No foreign transaction fees", "Priority support"].map((f) => <li key={f}>{I.tick}{f}</li>)}</ul>
-              <Link className="btn wide shine" href={primaryHref}>Get Plus</Link>
-            </article>
-          </div>
-        </section>
-
-        {/* ---------- FAQ ---------- */}
-        <section id="faq" className="lp-section faq">
-          <div className="sec-intro" data-reveal>
-            <span className="eyebrow">FAQ</span>
-            <h2>Questions, answered.</h2>
-          </div>
-          <div className="faq-list">
-            {FAQ.map(([q, a], i) => (
-              <details key={q} className="glass" data-reveal data-delay={String(i * 60)}>
-                <summary>{q}<span className="plus" aria-hidden="true" /></summary>
-                <p>{a}</p>
-              </details>
-            ))}
-          </div>
-        </section>
-
-        {/* ---------- Final CTA ---------- */}
-        <section className="final-cta" data-reveal>
-          <div className="final-glow" aria-hidden="true" />
-          <LogoMark size={56} />
-          <h2>Drop anchor on better banking.</h2>
-          <p>Open an account in a minute. No monthly fees on Everyday.</p>
-          <div className="hero-actions">
-            <Link className="btn big shine" href={primaryHref}>{user ? "Go to dashboard" : "Open a free account"}{I.arrow}</Link>
-            {!user && <Link className="btn ghost big" href="/login">Sign in</Link>}
+        {/* Closing call to action */}
+        <section className="wf-cta">
+          <div className="wf-wrap wf-cta-in">
+            <h2>{signedIn ? "Your accounts are a tap away" : "Ready to bank with Anchor?"}</h2>
+            <Link className="wf-btn wf-btn-light" href={open}>{signedIn ? "Go to your accounts" : "Open an account"}</Link>
           </div>
         </section>
       </main>
 
-      {/* ---------- Footer ---------- */}
-      <footer className="lp-foot">
-        <div className="lp-wrap foot-grid">
-          <div className="foot-brand">
-            <Link href="/" className="lp-brand"><LogoMark size={30} /><span>Anchor</span></Link>
-            <p className="muted">Banking that moves at your speed.</p>
+      <footer className="wf-foot">
+        <div className="wf-wrap wf-foot-grid">
+          <div className="wf-foot-brand">
+            <Link href="/" className="wf-brand wf-brand-dark"><LogoMark size={30} /><span>Anchor Bank</span></Link>
+            <p>Checking, savings and cards in one place.</p>
           </div>
-          <div><b>Product</b><a href="#features">Features</a><a href="#pricing">Pricing</a><a href="#security">Security</a></div>
-          <div><b>Account</b><Link href="/signup">Open an account</Link><Link href="/login">Sign in</Link></div>
-          <div><b>Help</b><a href="#faq">FAQ</a><a href="#how">How it works</a></div>
+          <div><b>Accounts</b><a href="#accounts">Checking</a><a href="#accounts">Savings</a><a href="#accounts">Credit cards</a></div>
+          <div><b>Ways to bank</b><Link href="/login">Online banking</Link><a href="#app">Mobile app</a><a href="#deposit">Deposit &amp; withdraw</a></div>
+          <div><b>Help</b><a href="#help">Questions</a><a href="#security">Security center</a><Link href="/signup">Open an account</Link></div>
         </div>
-        <div className="lp-wrap foot-legal">
-          <span>© {new Date().getFullYear()} Anchor Bank</span>
-          <span>Anchor Bank. Banking that moves at your speed.</span>
+        <div className="wf-wrap wf-foot-legal">
+          <p>Deposits and withdrawals are reviewed before they&apos;re credited or sent. Card purchases through Ramp are provided by Ramp Network and subject to its terms and fees. APY is the annual percentage yield and may change.</p>
+          <p>© {new Date().getFullYear()} Anchor Bank. All rights reserved.</p>
         </div>
       </footer>
     </div>
