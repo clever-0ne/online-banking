@@ -61,7 +61,7 @@
 .wf-brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: #fff !important; font-weight: 800; font-size: 1.2rem; letter-spacing: -0.01em; }
 .wf-brand-dark { color: var(--wf-ink) !important; }
 .wf-nav { display: flex; gap: 4px; flex: 1; }
-.wf-nav a { color: #fff; text-decoration: none; font-weight: 600; font-size: 0.95rem; padding: 8px 12px; border-radius: 8px; }
+.wf-nav a { color: #fff; text-decoration: none; font-weight: 600; font-size: 0.95rem; padding: 8px 12px; border-radius: 8px; white-space: nowrap; }
 .wf-nav a:hover { background: rgb(255 255 255 / .12); }
 .wf-mast-end { display: flex; gap: 10px; margin-left: auto; }
 
