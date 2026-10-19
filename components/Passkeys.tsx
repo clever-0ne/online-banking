@@ -53,7 +53,12 @@ export function Passkeys() {
       toast(keys?.length ? "Passkey added" : "Passkey added. You'll use it each time you sign in");
     } catch (err) {
       const x = err as Error;
-      setError(x.name === "NotAllowedError" || x.name === "AbortError" ? "The passkey wasn't created. The request was canceled or timed out." : x.name === "InvalidStateError" ? "This device already has a passkey for your account." : x.message);
+      setError(
+        x.name === "NotAllowedError" || x.name === "AbortError" ? "The passkey wasn't created. The request was canceled or timed out." :
+        x.name === "InvalidStateError" ? "This device already has a passkey for your account." :
+        x.name === "SecurityError" ? "Passkeys can't be used on this web address. Open Anchor Bank at its main address and try again." :
+        x.name === "NotSupportedError" ? "This device or browser can't create passkeys. Try a current version of Safari, Chrome or Edge." :
+        x.message);
     } finally { setBusy(false); }
   }
 

@@ -102,3 +102,13 @@ textarea.input { resize: vertical; font: inherit; }
 .link-btn { border: 0; background: none; color: var(--accent); font: inherit; font-weight: 600; cursor: pointer; padding: 0 0 0 6px; }
 
 .adm-wrap .panel > .tk-row:first-child { border-top: 0; padding-block: 0; }
+
+/* Setup check */
+.setup summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+.setup summary::-webkit-details-marker { display: none; }
+.setup[open] summary { margin-bottom: 12px; }
+.setup-list { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 10px; }
+.setup-list li { display: flex; gap: 10px; align-items: flex-start; }
+.setup-dot { width: 22px; height: 22px; flex: none; border-radius: 50%; display: grid; place-items: center; font-size: 0.75rem; font-weight: 800; }
+.setup-dot.ok { background: var(--pos-soft); color: var(--pos); }
+.setup-dot.bad { background: var(--neg-soft); color: var(--neg); }

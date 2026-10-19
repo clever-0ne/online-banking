@@ -47,7 +47,10 @@ export default function LoginPage() {
     } catch (err) {
       const e = err as Error & { status?: number };
       if (e.status === 401 && /timed out/.test(e.message)) { setStep("password"); setPassword(""); }
-      setError(e.name === "NotAllowedError" || e.name === "AbortError" ? "The passkey request was canceled or timed out. Try again." : e.message);
+      setError(
+        e.name === "NotAllowedError" || e.name === "AbortError" ? "The passkey request was canceled or timed out. Try again." :
+        e.name === "SecurityError" ? "Passkeys can't be used on this web address. Open Anchor Bank at its main address and try again." :
+        e.message);
       setBusy(false);
     }
   }

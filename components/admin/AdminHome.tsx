@@ -11,7 +11,7 @@ import { fmt } from "@/lib/format";
 
 type Stats = Awaited<ReturnType<typeof statsFn>>;
 
-export function AdminHome({ base, initialUsers, stats, audit }: { base: string; initialUsers: AdminUserRow[]; stats: Stats; audit: AuditEntry[] }) {
+export function AdminHome({ base, initialUsers, stats, audit, setup }: { base: string; initialUsers: AdminUserRow[]; stats: Stats; audit: AuditEntry[]; setup?: React.ReactNode }) {
   const router = useRouter();
   const [users, setUsers] = useState(initialUsers);
   const [q, setQ] = useState("");
@@ -51,6 +51,8 @@ export function AdminHome({ base, initialUsers, stats, audit }: { base: string; 
       <div className="adm-head">
         <div><h1>Customers</h1><p className="muted">Everyone with an Anchor Bank account, and every change staff have made.</p></div>
       </div>
+
+      {setup}
 
       <div className="adm-stats">
         <div className="stat glass"><span className="stat-ico net">{ICONS.users}</span><span className="muted">Total users</span><b>{stats.total}</b></div>

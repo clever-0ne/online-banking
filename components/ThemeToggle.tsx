@@ -10,9 +10,9 @@ export type ThemeChoice = "system" | "light" | "dark";
 
 /**
  * Runs before first paint (inlined in <head>) so the theme never flashes.
- * Dark is the default; "light" or "system" are only used when the person chose them.
+ * Light is the default; "dark" or "system" are only used when the person chose them.
  */
-export const themeBootScript = `try{var t=localStorage.getItem("${THEME_KEY}"),r=document.documentElement;if(t==="system")r.removeAttribute("data-theme");else r.dataset.theme=t==="light"?"light":"dark"}catch(e){}`;
+export const themeBootScript = `try{var t=localStorage.getItem("${THEME_KEY}"),r=document.documentElement;if(t==="system")r.removeAttribute("data-theme");else r.dataset.theme=t==="dark"?"dark":"light"}catch(e){}`;
 
 function effectiveTheme(): "light" | "dark" {
   const set = document.documentElement.dataset.theme;

@@ -13,15 +13,35 @@ export interface PushMessage {
 }
 
 let configured: boolean | null = null;
+/** Why notifications are off on this server, or null when they are set up. Shown in the staff setup check. */
+export let pushProblem: string | null = null;
+
+/** The contact push services require: mailto: or https. A bare email address is accepted and fixed up. */
+function vapidSubject(): string {
+  const raw = (process.env.VAPID_SUBJECT || process.env.APP_ORIGIN || "").trim();
+  if (/^(mailto:|https:\/\/)/.test(raw)) return raw;
+  if (/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(raw)) return "mailto:" + raw;
+  return "mailto:support@anchor.bank";
+}
+
 export function pushConfigured(): boolean {
   if (configured !== null) return configured;
-  const pub = process.env.VAPID_PUBLIC_KEY, priv = process.env.VAPID_PRIVATE_KEY;
-  if (!pub || !priv) return (configured = false);
-  const subject = process.env.VAPID_SUBJECT || process.env.APP_ORIGIN || "mailto:support@anchor.bank";
-  webpush.setVapidDetails(subject, pub, priv);
+  const pub = process.env.VAPID_PUBLIC_KEY?.trim(), priv = process.env.VAPID_PRIVATE_KEY?.trim();
+  if (!pub || !priv) {
+    pushProblem = "VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY aren't set.";
+    return (configured = false);
+  }
+  try {
+    webpush.setVapidDetails(vapidSubject(), pub, priv);
+  } catch (e) {
+    pushProblem = `The VAPID keys aren't valid (${(e as Error).message}). Generate a new pair with: npx web-push generate-vapid-keys`;
+    console.warn("[push]", pushProblem);
+    return (configured = false);
+  }
+  pushProblem = null;
   return (configured = true);
 }
-export const publicKey = () => process.env.VAPID_PUBLIC_KEY ?? "";
+export const publicKey = () => process.env.VAPID_PUBLIC_KEY?.trim() ?? "";
 
 /** "Chrome on Windows" and so on, from a User-Agent header. */
 export function deviceName(ua: string | null): string {

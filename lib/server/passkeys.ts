@@ -13,17 +13,17 @@ import {
 } from "@simplewebauthn/server";
 import { isoBase64URL, isoUint8Array } from "@simplewebauthn/server/helpers";
 import { all, one, run } from "./db";
+import { siteOrigin } from "./origin";
 import { sign } from "./session";
 
 const RP_NAME = "Anchor Bank";
 const STEP_MS = 5 * 60 * 1000; // a challenge or a half-finished sign-in lasts 5 minutes
 
-/** The site passkeys are tied to. Set APP_ORIGIN (e.g. https://anchorbank.com) in production. */
+/** The site passkeys are tied to: the address the customer is actually using (see origin.ts). */
 function relyingParty(req: NextRequest) {
-  const origin = process.env.APP_ORIGIN
-    ? new URL(process.env.APP_ORIGIN).origin
-    : `${req.headers.get("x-forwarded-proto") ?? req.nextUrl.protocol.replace(":", "")}://${req.headers.get("host")}`;
-  return { origin, rpID: new URL(origin).hostname };
+  const site = siteOrigin(req.headers, req.nextUrl.protocol.replace(":", ""));
+  if (site.problem) console.warn("[passkeys]", site.problem);
+  return { origin: site.origin, rpID: site.rpID };
 }
 
 // ---------- Short-lived signed cookies ----------
