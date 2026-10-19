@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FloatingDownload } from "@/components/landing/FloatingDownload";
 import { HeroSignOn } from "@/components/landing/HeroSignOn";
 import { LogoMark } from "@/components/Logo";
 import { currentUser } from "@/lib/server/current";
@@ -50,7 +51,8 @@ export default async function Landing() {
   const user = await currentUser();
   const signedIn = !!user;
   const open = signedIn ? "/dashboard" : "/signup";
-  const go = (path: string) => (signedIn ? path : "/signup");
+  // Shortcuts: signed-out visitors log in first, then land on the page they picked.
+  const go = (path: string) => (signedIn ? path : `/login?next=${encodeURIComponent(path)}`);
 
   return (
     <div className="wf">
@@ -85,10 +87,7 @@ export default async function Landing() {
             {signedIn ? (
               <Link className="wf-btn wf-btn-light" href="/dashboard">My accounts</Link>
             ) : (
-              <>
-                <Link className="wf-btn wf-btn-ghost" href="/login">Sign on</Link>
-                <Link className="wf-btn wf-btn-light" href="/signup">Open account</Link>
-              </>
+              <Link className="wf-btn wf-btn-light" href="/login">Log in</Link>
             )}
           </div>
         </div>
@@ -279,6 +278,8 @@ export default async function Landing() {
           <p>© {new Date().getFullYear()} Anchor Bank. All rights reserved.</p>
         </div>
       </footer>
+
+      <FloatingDownload />
     </div>
   );
 }

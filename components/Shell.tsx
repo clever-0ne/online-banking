@@ -7,6 +7,7 @@ import { useBank } from "./BankProvider";
 import { LogoMark } from "./Logo";
 import { ICONS, NAV_GROUPS, OPEN_MENU_EVENT } from "./nav";
 import { InstallApp } from "./InstallApp";
+import { PushReminder } from "./PushReminder";
 import { ThemeToggle } from "./ThemeToggle";
 import { Avatar } from "./Avatar";
 import { alertFeed } from "@/lib/logic";
@@ -106,6 +107,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
       <main>
         <div className="wrap">{children}</div>
       </main>
+
+      <PushReminder />
 
       <nav className="tabbar" aria-label="Quick navigation">
         {tabs.slice(0, 2).map((t) => (
