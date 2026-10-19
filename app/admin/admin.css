@@ -1,0 +1,104 @@
+/* Staff console only. Loaded by app/admin/layout.tsx, never on customer pages. */
+
+/* ---------- Admin ---------- */
+.adm { min-height: 100vh; }
+.adm-bar { position: sticky; top: 0; z-index: 30; background: var(--glass-strong); backdrop-filter: blur(18px) saturate(1.5); border-bottom: 1px solid var(--glass-border); padding-top: env(safe-area-inset-top, 0px); }
+.adm-bar-in { max-width: 1320px; margin: 0 auto; height: 64px; display: flex; align-items: center; gap: 14px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.adm-badge { font-size: 0.7rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; padding: 3px 9px; border-radius: 99px; background: var(--accent); color: var(--accent-ink); }
+.adm-nav { display: flex; gap: 4px; margin-left: 10px; }
+.adm-nav a { text-decoration: none; color: var(--ink-2); font-weight: 600; font-size: 0.9rem; padding: 7px 12px; border-radius: 10px; }
+.adm-nav a:hover { background: var(--surface-2); }
+.adm-nav a[aria-current="page"] { background: var(--accent-soft); color: var(--accent); }
+.adm-end { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.adm-me { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.88rem; }
+.adm-main { padding-block: 26px 60px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.adm-wrap { max-width: 1320px; margin: 0 auto; display: grid; gap: 18px; min-width: 0; }
+.adm-wrap > * { min-width: 0; }
+.adm-head h1 { font-size: 1.7rem; }
+.adm-stats { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; }
+.adm-stats .stat { grid-template-rows: auto 1fr auto; }
+.adm-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 18px; align-items: start; }
+.adm-side { display: grid; gap: 18px; }
+.adm-toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+.adm-toolbar .input { width: auto; flex: 0 1 160px; }
+.adm-search { position: relative; flex: 1 1 260px; display: flex; }
+.adm-search svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 17px; height: 17px; color: var(--muted); }
+.adm-search .input { flex: 1; width: 100%; padding-left: 38px; }
+.adm-table td { vertical-align: middle; padding-block: 11px; }
+.adm-table th { white-space: nowrap; }
+.adm-user { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; min-width: 220px; }
+.adm-user:hover b { color: var(--accent); }
+.block { display: block; }
+.row-actions { display: inline-flex; gap: 6px; justify-content: flex-end; }
+.danger-text { color: var(--neg) !important; }
+.spark-bars { display: flex; align-items: flex-end; gap: 5px; height: 90px; }
+.spark-bars span { flex: 1; border-radius: 6px 6px 3px 3px; background: var(--accent); min-height: 4px; }
+.spark-bars span.zero { background: var(--surface-3); }
+.audit-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.audit-list li { display: flex; gap: 10px; font-size: 0.86rem; }
+.audit-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); margin-top: 6px; flex: none; }
+.audit-dot.suspend, .audit-dot.delete_user, .audit-dot.reset_bank_data { background: var(--neg); }
+.audit-dot.activate, .audit-dot.sign_up { background: var(--pos); }
+.audit-dot.sign_in { background: var(--muted); }
+.adm-profile { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.adm-profile .avatar.xl { width: 84px; height: 84px; font-size: 1.6rem; }
+.adm-id { display: grid; gap: 4px; flex: 1; min-width: 220px; }
+.adm-id h1 { font-size: 1.5rem; }
+.pill-row { display: flex; gap: 6px; margin-top: 4px; }
+.adm-facts { display: grid; grid-template-columns: repeat(4, auto); gap: 6px 28px; margin: 0; }
+.adm-facts div { display: grid; gap: 2px; }
+.adm-facts dt { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-weight: 700; }
+.adm-facts dd { margin: 0; font-weight: 600; font-size: 0.9rem; }
+.adm-detail { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.adm-col { display: grid; gap: 18px; min-width: 0; }
+.adm-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.adm-act { display: flex; align-items: center; gap: 12px; text-align: left; padding: 12px; border-radius: 16px; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); cursor: pointer; transition: border-color .15s, transform .15s; }
+.adm-act:hover:not(:disabled) { border-color: var(--accent); transform: translateY(-1px); }
+.adm-act:disabled { opacity: .45; cursor: not-allowed; }
+.adm-act > span:last-child { display: grid; min-width: 0; }
+.adm-act b { font-size: 0.88rem; }
+.adm-act .muted { font-size: 0.74rem; }
+.adm-act.danger b { color: var(--neg); }
+.adm-confirm { margin-top: 14px; padding: 16px; border-radius: 16px; border: 1px solid var(--line-strong); background: var(--surface-2); display: grid; gap: 10px; }
+.adm-confirm code, .temp-pw code { font-family: var(--f-mono); }
+.temp-pw { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 16px; align-items: center; border-color: var(--pos); }
+.temp-pw code { font-size: 1.15rem; font-weight: 600; padding: 10px 14px; border-radius: 12px; background: var(--pos-soft); color: var(--pos); user-select: all; }
+textarea.input { resize: vertical; font: inherit; }
+.adm-denied { min-height: 100vh; display: grid; place-items: center; padding: 16px; }
+.adm-denied .panel { max-width: 440px; display: grid; gap: 12px; }
+@media (max-width: 1100px) {
+  .adm-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .adm-grid, .adm-detail { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 640px) {
+  .adm-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .adm-nav, .adm-me span { display: none; }
+  .adm-actions { grid-template-columns: minmax(0, 1fr); }
+  .adm-facts { grid-template-columns: repeat(2, auto); }
+  .temp-pw { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---------- Staff sign-in ---------- */
+.adm-login { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; background: radial-gradient(700px 400px at 50% 0%, rgb(91 79 233 / .18), transparent 70%), var(--bg); }
+.adm-login-card { width: min(400px, 100%); display: grid; gap: 14px; padding: 32px 28px; border-radius: 24px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-lg); }
+.adm-login-head { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+.adm-login-head b { display: block; font-size: 1.05rem; }
+.adm-login-head span { font-size: 0.74rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.adm-login-card h1 { font-size: 1.45rem; }
+
+/* ---------- Staff: deposits and withdrawals ---------- */
+.adm-addrs { display: grid; gap: 14px; }
+.adm-addr { display: grid; gap: 6px; }
+.adm-addr-head { display: flex; align-items: center; gap: 8px; }
+.adm-addr-head .pill { margin-left: auto; }
+.adm-addr-row { display: flex; gap: 8px; }
+.adm-addr-row .input { flex: 1; min-width: 0; }
+.adm-reqs { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.adm-req { display: flex; gap: 16px; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; padding: 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface-2); }
+.adm-req-main { display: grid; gap: 4px; min-width: 0; flex: 1 1 320px; }
+.adm-req-main > div { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.adm-req-act { display: grid; gap: 8px; flex: 0 1 300px; }
+.adm-code { font-family: var(--f-mono); font-size: 0.8rem; overflow-wrap: anywhere; color: var(--ink); }
+.link-btn { border: 0; background: none; color: var(--accent); font: inherit; font-weight: 600; cursor: pointer; padding: 0 0 0 6px; }
+
+.adm-wrap .panel > .tk-row:first-child { border-top: 0; padding-block: 0; }

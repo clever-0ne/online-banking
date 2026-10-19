@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0E0E19">
+  <title>You're offline · Anchor Bank</title>
+  <style>
+    :root { color-scheme: dark; }
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px; box-sizing: border-box;
+      background: radial-gradient(60% 50% at 50% 40%, #241d52 0%, #0E0E19 70%); color: #ECEBF5;
+      font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; text-align: center; }
+    main { max-width: 340px; }
+    img { width: 72px; height: 72px; border-radius: 18px; box-shadow: 0 12px 40px -12px #7C4DF2; }
+    h1 { font-size: 1.4rem; margin: 20px 0 8px; }
+    p { color: #A9A7BF; margin: 0 0 24px; }
+    button { border: 0; border-radius: 14px; padding: 12px 22px; font: inherit; font-weight: 700; color: #fff; cursor: pointer;
+      background: linear-gradient(135deg, #4B3FE0, #7C4DF2 55%, #C46BD6); }
+  </style>
+</head>
+<body>
+  <main>
+    <img src="/icon-192.png" alt="">
+    <h1>You're offline</h1>
+    <p>Anchor Bank needs a connection to show your accounts. Check your Wi-Fi or mobile data and try again.</p>
+    <button type="button" onclick="location.reload()">Try again</button>
+  </main>
+</body>
+</html>
