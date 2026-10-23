@@ -20,7 +20,7 @@ export function FundingList({ items, type }: { items: FundingRequest[]; type: "d
           </div>
           <div className="row-end">
             <span className={`pill ${r.status === "pending" ? "pending" : r.status === "approved" ? "good" : "bad"}`}>{STATUS_LABEL[r.status]}</span>
-            <span className={`num${type === "deposit" && r.status === "approved" ? " pos" : ""}`}>{type === "deposit" ? "+" : "−"}{fmt(r.amount)}</span>
+            <span className={`num${r.status === "approved" ? (type === "deposit" ? " pos" : " neg") : ""}`}>{type === "deposit" ? "+" : "−"}{fmt(r.amount)}</span>
           </div>
         </li>
       ))}

@@ -4,6 +4,7 @@
 // large balance, caption), quick actions, recent activity, and upcoming payments down the side.
 import Link from "next/link";
 import { useBank } from "@/components/BankProvider";
+import { Ring } from "@/components/charts";
 import { ICONS } from "@/components/nav";
 import { daysUntil, fmt, fromISO, longDate, mask } from "@/lib/format";
 import { acct, alertFeed, available, bandOf, scheduledLabel, sortedTx } from "@/lib/logic";
@@ -67,11 +68,20 @@ export default function DashboardPage() {
             ))}
             <Link href={go("/cards")} className="acct-tile">
               <span className="acct-label" translate="no">{cc.name.toUpperCase()} {mask(cc.last4)}</span>
-              <span className="acct-amount num">{fmt(owed)}</span>
+              <span className={`acct-amount num${owed > 0 ? " owed" : ""}`}>{fmt(owed)}</span>
               <span className="acct-cap">Current balance · {fmt(available(state, "cc"))} available credit</span>
               <span className="acct-due">{owed > 0 && cc.dueDate ? <>Minimum {fmt(cc.minDue ?? 0)} due {longDate(cc.dueDate)}</> : "No payment due"}</span>
             </Link>
           </div>
+
+          {can("/deposit") && <Link href="/deposit" className="add-link">{ICONS.plusCircle}<span>Make a deposit</span></Link>}
+
+          {can("/credit") && (
+            <Link href="/credit" className="score-card">
+              <Ring value={score === null ? 0 : score - 300} max={550} size={56} color="var(--pos)"><b className="num">{score ?? "—"}</b></Ring>
+              <span><b>{score === null ? "Your credit score will appear here" : `Your credit score is ${bandOf(score).toLowerCase()}`}</b><span className="muted small block">{score === null ? "Usually within one statement cycle" : "Updated monthly"}</span></span>
+            </Link>
+          )}
 
           <div className="quick-tiles">
             {actions.map(([href, label, icon]) => (
@@ -97,7 +107,7 @@ export default function DashboardPage() {
                         <b>{t.payee}</b>
                         <span className="muted small block">{name(t.acct)}{t.status === "pending" ? " · Pending" : ""}</span>
                       </td>
-                      <td className={`r num${t.amount > 0 ? " pos" : ""}`}>{t.amount > 0 ? "+" : "−"}{fmt(Math.abs(t.amount))}</td>
+                      <td className={`r num ${t.amount > 0 ? "pos" : "neg"}`}>{t.amount > 0 ? "+" : "−"}{fmt(Math.abs(t.amount))}</td>
                     </tr>
                   ))}
                 </tbody>

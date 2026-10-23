@@ -1132,3 +1132,62 @@ h2 { font-weight: 600; font-size: 1.2rem; }
   .sec-title { font-size: 1.4rem; }
 }
 .amount-in .input, .input.mono { font-family: var(--f-sans); letter-spacing: 0; }
+
+/* Coloured amounts: balances in the brand colour, money in green, money out and amounts owed in red. */
+.pos, .num.pos, .tx-amt.pos { color: var(--pos) !important; }
+.neg, .num.neg, .tx-amt.neg { color: var(--neg) !important; }
+.acct-amount, .greet-total b, .acct-bal, .bal-amount, .stat b { color: var(--accent); }
+.acct-amount.owed { color: var(--neg); }
+.summary-tx td.num, .tx-amt { font-weight: 600; }
+.tx-amt { font-family: var(--f-sans); }
+
+/* =====================================================================================================
+   Phones: the big-bank app look. Light header over a soft lavender gradient, a large light greeting,
+   white account tiles, a credit score card, and a tab bar with Accounts, Deposit, Pay & Transfer,
+   Explore and Menu.
+   ===================================================================================================== */
+.add-link, .score-card { display: none; }
+.mast .icon-btn .dot { display: grid; place-items: center; font-size: 0; }
+@media (max-width: 760px) {
+  /* Header: light, no brand bar; logo, bell with a count, Sign off. */
+  .topbar.mast { background: transparent !important; box-shadow: none; color: var(--head); position: relative; }
+  .app:not(:has(.summary)) .topbar.mast { background: var(--surface) !important; border-bottom: 1px solid var(--line); }
+  .mast .brand { color: var(--head); }
+  .mast .icon-btn { color: var(--head); }
+  .mast .icon-btn:hover { background: rgb(0 0 0 / .05); }
+  .mast-menu, .mast .avatar-link, .mast .topbar-end > button:first-child:not(.mast-signoff) { display: none !important; }
+  .mast-signoff { display: inline-block !important; border: 0; color: var(--head); padding: 6px 4px 6px 8px; font-size: 0.9rem; background: none; }
+  .mast-signoff:hover { background: none; text-decoration: underline; }
+  .mast .icon-btn .dot { top: 3px; right: 1px; min-width: 18px; height: 18px; width: auto; padding: 0 5px; border-radius: 99px; font-size: 0.66rem; font-weight: 700; color: #fff; background: var(--neg); box-shadow: 0 0 0 2px #fff; }
+
+  /* Lavender gradient behind the greeting and accounts. */
+  .app:has(.summary) { background: linear-gradient(180deg, #B7B0E2 0px, #CEC8EC 220px, #E7E3F3 460px, var(--bg) 760px); }
+  :root[data-theme="dark"] .app:has(.summary) { background: linear-gradient(180deg, #2A2560 0px, #1E1B40 300px, var(--bg) 700px); }
+  .greet-band { background: none; border: 0; margin: 0; padding: 4px 0 6px; }
+  .greet-band h1 { font-size: 2.15rem; line-height: 1.15; font-weight: 300; color: var(--head); }
+  .greet-band p, .greet-total { display: none; }
+  .summary > .notice { margin-top: -6px; }
+  .summary-main > .sec-title:first-child { display: none; }
+  .acct-tiles { gap: 14px; }
+  .acct-tile { padding: 18px 18px 16px; border-top: 0; box-shadow: 0 1px 4px rgb(30 20 80 / .18); }
+  .acct-label { font-size: 0.86rem; font-weight: 600; letter-spacing: .01em; }
+  .acct-amount { font-size: 2.3rem; color: var(--head); margin-top: 4px; }
+  .acct-amount.owed { color: var(--neg); }
+  .acct-cap { font-size: 0.82rem; color: var(--ink-2); }
+
+  /* "+ Make a deposit" and the credit score card. */
+  .add-link { display: inline-flex; align-items: center; gap: 8px; color: var(--accent); font-weight: 600; text-decoration: none; padding: 4px 2px; }
+  .add-link svg { width: 24px; height: 24px; fill: var(--accent); stroke: #fff; }
+  .score-card { display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border-radius: 10px; box-shadow: 0 1px 4px rgb(30 20 80 / .18); text-decoration: none; color: inherit; }
+  .score-card b { font-weight: 600; }
+  .score-card .num { font-size: 0.95rem; font-weight: 700; color: var(--head); }
+  .quick-tiles { display: none; }
+  .summary-side .panel:has(.score-line) { display: none; }
+
+  /* Tab bar: five labelled tabs; the current one in the brand colour. */
+  .tabbar { grid-template-columns: repeat(5, 1fr) !important; }
+  .tabbar a, .tabbar .tab-menu { display: grid; justify-items: center; align-content: center; gap: 3px; font-size: 0.68rem; font-weight: 600; color: var(--muted); text-decoration: none; padding: 6px 2px; background: none; border: 0; cursor: pointer; text-align: center; line-height: 1.1; }
+  .tabbar a svg, .tabbar .tab-menu svg { width: 23px; height: 23px; }
+  .tabbar a[aria-current="page"] { color: var(--accent); box-shadow: none; }
+  .tabbar a[aria-current="page"] svg { stroke-width: 2.2; }
+}

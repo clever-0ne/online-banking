@@ -28,10 +28,10 @@ export function Shell({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener(OPEN_MENU_EVENT, openMenu);
   }, []);
   const tabs = [
-    { href: "/dashboard", label: "Home", icon: ICONS.home },
-    { href: "/activity", label: "History", icon: ICONS.history },
-    { href: "/cards", label: "Card", icon: ICONS.card },
-    { href: "/profile", label: "Profile", icon: ICONS.user },
+    { href: "/dashboard", label: "Accounts", icon: ICONS.home, match: ["/dashboard", "/activity", "/statements", "/cards"] },
+    { href: "/deposit", label: "Deposit", icon: ICONS.deposit, match: ["/deposit", "/withdraw"] },
+    { href: "/transfer", label: "Pay & Transfer", icon: ICONS.payments, match: ["/transfer", "/send", "/bills"] },
+    { href: "/budget", label: "Explore", icon: ICONS.compass, match: ["/budget", "/goals", "/credit"] },
   ].filter((t) => can(t.href));
   // Only the pages this customer can use appear in the menu.
   const groups = NAV_GROUPS.map((g) => ({ ...g, items: g.items.filter((n) => can(n.href)) })).filter((g) => g.items.length > 0);
@@ -79,7 +79,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             <ThemeToggle />
             {can("/alerts") && <Link href="/alerts" className="icon-btn" aria-label={`Alerts${alertCount ? `, ${alertCount} need attention` : ""}`}>
               {ICONS.bell}
-              {alertCount > 0 && <span className="dot" />}
+              {alertCount > 0 && <span className="dot">{alertCount > 9 ? "9+" : alertCount}</span>}
             </Link>}
             <Link href={can("/profile") ? "/profile" : "/dashboard"} className="avatar-link" aria-label={can("/profile") ? "Your profile" : "Dashboard"}>
               <Avatar name={state.customer.name} photo={state.profile.photo} />
@@ -128,13 +128,10 @@ export function Shell({ children }: { children: React.ReactNode }) {
       <PushReminder />
 
       <nav className="tabbar" aria-label="Quick navigation">
-        {tabs.slice(0, 2).map((t) => (
-          <Link key={t.href} href={t.href} aria-current={path === t.href ? "page" : undefined}>{t.icon}{t.label}</Link>
+        {tabs.map((t) => (
+          <Link key={t.href} href={t.href} aria-current={t.match.includes(path) ? "page" : undefined}>{t.icon}<span>{t.label}</span></Link>
         ))}
-        {can("/send") && <Link href="/send" aria-current={path === "/send" ? "page" : undefined}>{ICONS.send}Send</Link>}
-        {tabs.slice(2).map((t) => (
-          <Link key={t.href} href={t.href} aria-current={path === t.href ? "page" : undefined}>{t.icon}{t.label}</Link>
-        ))}
+        <button type="button" className="tab-menu" aria-expanded={open} aria-controls="drawer" onClick={() => setOpen(true)}>{ICONS.menu}<span>Menu</span></button>
       </nav>
     </div>
   );

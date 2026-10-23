@@ -62,7 +62,7 @@ export default function StatementsPage() {
                 <thead><tr><th>Date</th><th>Description</th><th className="r">Amount</th></tr></thead>
                 <tbody>
                   {st.tx.map((t) => (
-                    <tr key={t.id}><td className="num">{shortDate(t.date)}</td><td>{t.payee}<span className="muted"> · {t.memo}</span></td><td className={`r num${t.amount > 0 ? " pos" : ""}`}>{signed(t.amount)}</td></tr>
+                    <tr key={t.id}><td className="num">{shortDate(t.date)}</td><td>{t.payee}<span className="muted"> · {t.memo}</span></td><td className={`r num ${t.amount > 0 ? "pos" : "neg"}`}>{signed(t.amount)}</td></tr>
                   ))}
                 </tbody>
               </table>

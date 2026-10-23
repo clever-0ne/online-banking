@@ -18,7 +18,7 @@ export function TxList({ items, accounts, showAccount = true }: { items: Tx[]; a
                 <b>{t.payee}</b>
                 <span>{t.memo} · {t.cat}{showAccount && acct ? ` · ${acct.name}` : ""}</span>
               </div>
-              <div className={`tx-amt${t.amount > 0 ? " pos" : ""}`}>
+              <div className={`tx-amt ${t.amount > 0 ? "pos" : "neg"}`}>
                 {signed(t.amount)}
                 {t.status === "pending" && <small><span className="pill pending">Pending</span></small>}
               </div>
