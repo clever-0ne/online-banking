@@ -5,7 +5,7 @@ import { PwaRegister } from "@/components/PwaRegister";
 import { themeBootScript } from "@/components/ThemeToggle";
 import "./globals.css";
 
-const sans = Source_Sans_3({ subsets: ["latin"], weight: ["400", "600", "700"], variable: "--font-sans" });
+const sans = Source_Sans_3({ subsets: ["latin"], weight: ["300", "400", "600", "700"], variable: "--font-sans" });
 const mono = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-mono" });
 
 export const metadata: Metadata = {

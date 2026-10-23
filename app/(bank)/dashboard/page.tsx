@@ -1,7 +1,7 @@
 "use client";
 
-// Account summary: every account in rows with its balance, the card with what's due, recent activity and
-// quick links, the way a retail bank lays out its first page after sign-on.
+// Account summary in the retail-bank pattern: a greeting band, one tile per account (small uppercase label,
+// large balance, caption), quick actions, recent activity, and upcoming payments down the side.
 import Link from "next/link";
 import { useBank } from "@/components/BankProvider";
 import { ICONS } from "@/components/nav";
@@ -26,11 +26,12 @@ export default function DashboardPage() {
   const upcoming = [...state.scheduled].sort((a, b) => a.date.localeCompare(b.date)).slice(0, 4);
   const score = state.credit.score;
   const name = (id: string) => state.accounts.find((a) => a.id === id)?.name ?? "";
+  const go = (href: string) => (can(href) ? href : "/dashboard");
 
   const actions = [
-    ["/transfer", "Transfer money", ICONS.transfer],
+    ["/transfer", "Transfer", ICONS.transfer],
     ["/send", "Send money", ICONS.send],
-    ["/bills", "Pay a bill", ICONS.bill],
+    ["/bills", "Pay bills", ICONS.bill],
     ["/deposit", "Deposit", ICONS.topup],
     ["/withdraw", "Withdraw", ICONS.request],
     ["/statements", "Statements", ICONS.note],
@@ -38,59 +39,51 @@ export default function DashboardPage() {
 
   return (
     <div className="summary">
-      <div className="summary-head">
+      <section className="greet-band">
         <div>
           <h1>{greeting}, {first}</h1>
-          <p className="muted">{today}</p>
+          <p>{today}</p>
         </div>
-        <div className="actions">
-          {can("/transfer") && <Link className="btn" href="/transfer">Transfer &amp; pay</Link>}
-          {can("/deposit") && <Link className="btn ghost" href="/deposit">Deposit</Link>}
+        <div className="greet-total">
+          <span>Total available</span>
+          <b className="num">{fmt(cashTotal)}</b>
         </div>
-      </div>
+      </section>
 
       {warnings.length > 0 && (
-        <Link href={can("/alerts") ? "/alerts" : "/dashboard"} className="notice warn"><b>{warnings[0].title}.</b> {warnings[0].body}</Link>
+        <Link href={go("/alerts")} className="notice warn"><b>{warnings[0].title}.</b> {warnings[0].body}</Link>
       )}
 
       <div className="summary-grid">
         <div className="summary-main">
-          {/* Cash accounts */}
-          <section className="panel flush">
-            <div className="acct-head"><h2>Cash accounts</h2><span className="muted small">Available balance</span></div>
-            <ul className="acct-list">
-              {cash.map((a) => (
-                <li key={a.id}>
-                  <Link href={can("/activity") ? "/activity" : "/dashboard"} className="acct-row">
-                    <span className="acct-name"><b translate="no">{a.name}</b><span className="muted">{mask(a.last4)}{a.apy ? ` · ${a.apy}% APY` : ""}{a.held ? ` · ${fmt(a.held)} on hold` : ""}</span></span>
-                    <span className="acct-bal num">{fmt(available(state, a.id))}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-            <div className="acct-total"><span>Total available</span><b className="num">{fmt(cashTotal)}</b></div>
-          </section>
+          <h2 className="sec-title">Accounts</h2>
+          <div className="acct-tiles">
+            {cash.map((a) => (
+              <Link key={a.id} href={go("/activity")} className="acct-tile">
+                <span className="acct-label" translate="no">{a.name.toUpperCase()} {mask(a.last4)}</span>
+                <span className="acct-amount num">{fmt(available(state, a.id))}</span>
+                <span className="acct-cap">Available balance{a.apy ? ` · ${a.apy}% APY` : ""}{a.held ? ` · ${fmt(a.held)} on hold` : ""}</span>
+              </Link>
+            ))}
+            <Link href={go("/cards")} className="acct-tile">
+              <span className="acct-label" translate="no">{cc.name.toUpperCase()} {mask(cc.last4)}</span>
+              <span className="acct-amount num">{fmt(owed)}</span>
+              <span className="acct-cap">Current balance · {fmt(available(state, "cc"))} available credit</span>
+              <span className="acct-due">{owed > 0 && cc.dueDate ? <>Minimum {fmt(cc.minDue ?? 0)} due {longDate(cc.dueDate)}</> : "No payment due"}</span>
+            </Link>
+          </div>
 
-          {/* Credit card */}
-          <section className="panel flush">
-            <div className="acct-head"><h2>Credit cards</h2><span className="muted small">Current balance</span></div>
-            <ul className="acct-list">
-              <li>
-                <Link href={can("/cards") ? "/cards" : "/dashboard"} className="acct-row">
-                  <span className="acct-name"><b translate="no">{cc.name}</b><span className="muted">{mask(cc.last4)} · {fmt(available(state, "cc"))} available of {fmt(cc.limit ?? 0)}</span></span>
-                  <span className="acct-bal num">{fmt(owed)}</span>
-                </Link>
-              </li>
-            </ul>
-            <div className="acct-total">
-              <span>{owed > 0 && cc.dueDate ? <>Minimum payment {fmt(cc.minDue ?? 0)} due {longDate(cc.dueDate)}</> : "No payment due"}</span>
-              {owed > 0 && can("/transfer") && <Link className="see-all" href="/transfer">Make a payment</Link>}
-            </div>
-          </section>
+          <div className="quick-tiles">
+            {actions.map(([href, label, icon]) => (
+              <Link key={href} href={href} className="quick-tile"><span className="quick-ico">{icon}</span><span>{label}</span></Link>
+            ))}
+          </div>
 
-          {/* Recent activity */}
+          <div className="sec-row">
+            <h2 className="sec-title">Recent activity</h2>
+            {can("/activity") && <Link className="more-link" href="/activity">View all activity</Link>}
+          </div>
           <section className="panel flush">
-            <div className="acct-head"><h2>Recent activity</h2>{can("/activity") && <Link className="see-all" href="/activity">View all activity</Link>}</div>
             {recent.length === 0 ? (
               <p className="empty">No activity yet. Make a deposit to get started.</p>
             ) : (
@@ -115,16 +108,7 @@ export default function DashboardPage() {
 
         <aside className="summary-side">
           <section className="panel">
-            <h2 className="side-title">I want to…</h2>
-            <ul className="quick-list">
-              {actions.map(([href, label, icon]) => (
-                <li key={href}><Link href={href}><span className="quick-ico">{icon}</span>{label}<span className="quick-chev">{ICONS.arrow}</span></Link></li>
-              ))}
-            </ul>
-          </section>
-
-          <section className="panel">
-            <div className="side-head"><h2 className="side-title">Upcoming payments</h2>{can("/bills") && <Link className="see-all" href="/bills">Bill pay</Link>}</div>
+            <div className="side-head"><h2 className="side-title">Upcoming payments</h2>{can("/bills") && <Link className="more-link" href="/bills">Bill pay</Link>}</div>
             {upcoming.length === 0 ? <p className="muted small">Nothing scheduled.</p> : (
               <ul className="side-list">
                 {upcoming.map((s) => {
@@ -142,8 +126,8 @@ export default function DashboardPage() {
 
           {can("/goals") && (
             <section className="panel">
-              <div className="side-head"><h2 className="side-title">Savings goals</h2><Link className="see-all" href="/goals">Manage</Link></div>
-              {state.goals.length === 0 ? <p className="muted small">No goals yet. <Link href="/goals">Set one up</Link>.</p> : (
+              <div className="side-head"><h2 className="side-title">Savings goals</h2><Link className="more-link" href="/goals">Manage</Link></div>
+              {state.goals.length === 0 ? <p className="muted small">No goals yet. <Link className="more-link" href="/goals">Set one up</Link></p> : (
                 <ul className="side-list">
                   {state.goals.slice(0, 3).map((g) => (
                     <li key={g.id} className="goal-line">
@@ -158,7 +142,7 @@ export default function DashboardPage() {
 
           {can("/credit") && (
             <section className="panel">
-              <div className="side-head"><h2 className="side-title">Credit score</h2><Link className="see-all" href="/credit">Details</Link></div>
+              <div className="side-head"><h2 className="side-title">Credit score</h2><Link className="more-link" href="/credit">Details</Link></div>
               <p className="score-line"><b className="num">{score ?? "—"}</b><span className="muted small">{score === null ? "Not available yet" : bandOf(score)}</span></p>
             </section>
           )}

@@ -1050,3 +1050,85 @@ h2 { font-size: 1.15rem; }
 .goog-te-banner-frame, body > .skiptranslate, iframe.skiptranslate, #goog-gt-tt, .goog-te-balloon-frame, .VIpgJd-ZVi9od-ORHb-OEVmcd, .VIpgJd-ZVi9od-aZ2wEe-wOHMyf { display: none !important; }
 body { top: 0 !important; position: static !important; }
 .goog-text-highlight, font[style] { background: none !important; box-shadow: none !important; }
+
+/* =====================================================================================================
+   Retail-bank pattern (layout and type conventions of large U.S. bank sites, in Anchor's own colours):
+   17px body in warm grey, near-black headings, light-weight page titles, white cards with a soft shadow
+   and no border, a short accent rule above section titles, account tiles with an uppercase label and a
+   large light balance, semibold links with a chevron, thick underline on the active tab.
+   ===================================================================================================== */
+:root { --text: #5D5654; --head: #141414; --card-shadow: 0 1px 5px rgb(0 0 0 / .3); --rule: var(--brand-line); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --text: #C9C9D6; --head: #F2F2F7; --card-shadow: 0 1px 4px rgb(0 0 0 / .6); } }
+:root[data-theme="dark"] { --text: #C9C9D6; --head: #F2F2F7; --card-shadow: 0 1px 4px rgb(0 0 0 / .6); }
+
+body { font-size: 17px; line-height: 1.35; color: var(--text); }
+h1, h2, h3, b, strong, .tk-row-main b, .acct-name b { color: var(--head); }
+h1 { font-weight: 300; font-size: clamp(1.7rem, 3.4vw, 2.1rem); letter-spacing: 0; }
+.head h1, .dash-title h1 { font-weight: 300; }
+h2 { font-weight: 600; font-size: 1.2rem; }
+.muted { color: var(--muted); }
+
+/* Cards: white, soft shadow, no border, 10px corners. */
+.panel, .tk-panel, .stat, .mini-acct, .feature, .pick, .receipt, .keypad, .recipient, .auth-card, .tx-card, .stats-strip {
+  border: 0 !important; border-radius: 10px !important; box-shadow: var(--card-shadow) !important;
+}
+.panel-head h2, .sec-head h2, .tk-head h2 { font-size: 1.15rem; }
+
+/* Links: semibold, with a chevron. */
+.see-all, .more-link, .tk-link { color: var(--accent); font-weight: 600; text-decoration: none; font-size: 0.95rem; }
+.see-all::after, .more-link::after, .tk-link::after { content: " ›"; }
+.see-all:hover, .more-link:hover, .tk-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+/* Buttons: pill, semibold 15px. */
+.btn { font-size: 0.94rem; font-weight: 600; padding: 10px 20px; }
+
+/* Tabs and segmented choices: thick underline on the active one. */
+.seg { background: transparent !important; border-bottom: 1px solid var(--line); border-radius: 0 !important; padding: 0; gap: 4px; }
+.seg button { border-radius: 0 !important; background: transparent !important; color: var(--muted); font-weight: 600; padding: 10px 14px; box-shadow: none !important; border-bottom: 4px solid transparent; margin-bottom: -1px; }
+.seg button[aria-pressed="true"] { color: var(--head) !important; border-bottom-color: var(--rule); background: transparent !important; }
+.tk .seg button[aria-pressed="true"] { background: transparent !important; color: var(--head) !important; }
+
+/* Section titles with the short accent rule above. */
+.sec-title { position: relative; font-weight: 300; font-size: 1.6rem; color: var(--head); padding-top: 14px; margin: 6px 0 2px; }
+.sec-title::before { content: ""; position: absolute; top: 0; left: 0; width: 64px; height: 3px; background: var(--rule); border-radius: 2px; }
+.sec-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; }
+
+/* ---------- Account summary ---------- */
+.summary { gap: 22px; }
+.greet-band { display: flex; justify-content: space-between; align-items: flex-end; gap: 18px; flex-wrap: wrap; margin: -28px calc(-1 * max(16px, env(safe-area-inset-left, 0px))) 0; padding: 30px max(16px, env(safe-area-inset-left, 0px)) 26px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 9%, var(--surface)) 0%, var(--bg) 100%); border-bottom: 1px solid var(--line); }
+@media (min-width: 1212px) { .greet-band { margin-left: calc((1180px - 100vw) / 2); margin-right: calc((1180px - 100vw) / 2); padding-left: calc((100vw - 1180px) / 2); padding-right: calc((100vw - 1180px) / 2); } }
+.greet-band h1 { font-size: clamp(1.8rem, 4vw, 2.3rem); font-weight: 300; }
+.greet-band p { color: var(--muted); margin-top: 4px; }
+.greet-total { display: grid; justify-items: end; }
+.greet-total span { font-size: 0.82rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.greet-total b { font-size: 1.9rem; font-weight: 300; }
+.summary-head { display: none; }
+
+.acct-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.acct-tile { display: grid; gap: 4px; align-content: start; padding: 20px 22px; background: var(--surface); border-radius: 10px; box-shadow: var(--card-shadow); text-decoration: none; color: inherit; border-top: 4px solid transparent; transition: border-color .15s, box-shadow .15s; }
+.acct-tile:hover { border-top-color: var(--accent); box-shadow: 0 2px 10px rgb(0 0 0 / .25); }
+.acct-label { font-size: 0.8rem; font-weight: 700; letter-spacing: .04em; color: var(--head); }
+.acct-amount { font-size: 2.1rem; font-weight: 300; color: var(--head); line-height: 1.15; margin-top: 6px; }
+.acct-cap { font-size: 0.85rem; color: var(--muted); }
+.acct-due { margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 0.88rem; color: var(--text); }
+
+.quick-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; }
+.quick-tile { display: grid; justify-items: center; gap: 8px; padding: 16px 8px; background: var(--surface); border-radius: 10px; box-shadow: var(--card-shadow); text-decoration: none; color: var(--head); font-weight: 600; font-size: 0.92rem; text-align: center; }
+.quick-tile:hover { color: var(--accent); }
+.quick-tile .quick-ico { width: 44px; height: 44px; }
+.quick-tile .quick-ico svg { width: 22px; height: 22px; }
+
+.summary-tx th { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.summary-tx td { color: var(--text); }
+.summary-tx b { color: var(--head); }
+.side-title { font-size: 1.15rem; font-weight: 600; }
+
+@media (max-width: 760px) {
+  .greet-band { margin-top: -18px; padding-top: 22px; padding-bottom: 20px; }
+  .greet-total { justify-items: start; }
+  .acct-amount { font-size: 1.85rem; }
+  .quick-tiles { grid-template-columns: repeat(3, 1fr); }
+  .sec-title { font-size: 1.4rem; }
+}
+.amount-in .input, .input.mono { font-family: var(--f-sans); letter-spacing: 0; }
