@@ -1031,3 +1031,17 @@ h2 { font-size: 1.15rem; }
 .bc-chip::after { display: none; }
 .reminder { border-radius: var(--r-lg); box-shadow: var(--shadow-lg); }
 .reminder-ico { border-radius: 50%; }
+
+/* Phones: a lighter masthead with smaller icons, logo and avatar. */
+@media (max-width: 560px) {
+  :root { --topbar-h: 54px; }
+  .mast .topbar-in { gap: 2px; padding-left: max(6px, env(safe-area-inset-left, 0px)); padding-right: max(10px, env(safe-area-inset-right, 0px)); }
+  .mast .brand { gap: 7px; font-size: 1rem; margin-right: 0; }
+  .mast .brand svg { width: 22px; height: 22px; }
+  .mast .icon-btn { width: 34px; height: 34px; border-radius: 8px; }
+  .mast .icon-btn svg { width: 19px; height: 19px; }
+  .mast .icon-btn .dot { top: 7px; right: 7px; width: 7px; height: 7px; }
+  .mast .topbar-end { gap: 0; }
+  .mast .avatar-link { margin-left: 4px; }
+  .mast .avatar-link .avatar { width: 30px; height: 30px; font-size: 0.7rem; }
+}
