@@ -53,12 +53,28 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="app">
-      <header className="topbar">
+      <header className="topbar mast">
         <div className="topbar-in">
-          <button ref={menuBtnRef} type="button" className="icon-btn" aria-label="Open menu" aria-expanded={open} aria-controls="drawer" onClick={() => setOpen(true)}>
+          <button ref={menuBtnRef} type="button" className="icon-btn mast-menu" aria-label="Open menu" aria-expanded={open} aria-controls="drawer" onClick={() => setOpen(true)}>
             {ICONS.menu}
           </button>
-          <Link href="/dashboard" className="brand"><LogoMark size={28} /><span>Anchor</span></Link>
+          <Link href="/dashboard" className="brand"><LogoMark size={28} /><span>Anchor Bank</span></Link>
+          {/* Desktop: the menu across the top, each heading opening its pages below it. */}
+          <nav className="mast-nav" aria-label="Main">
+            {groups.map((g) => {
+              const here = g.items.some((n) => path === n.href);
+              return (
+                <div className="mn-group" key={g.title}>
+                  <Link href={g.items[0].href} className="mn-top" aria-current={here ? "true" : undefined}>{g.title}</Link>
+                  <div className="mn-drop">
+                    {g.items.map((n) => (
+                      <Link key={n.href} href={n.href} aria-current={path === n.href ? "page" : undefined}>{n.icon}<span>{n.label}</span></Link>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </nav>
           <div className="topbar-end">
             <ThemeToggle />
             {can("/alerts") && <Link href="/alerts" className="icon-btn" aria-label={`Alerts${alertCount ? `, ${alertCount} need attention` : ""}`}>
@@ -68,6 +84,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             <Link href={can("/profile") ? "/profile" : "/dashboard"} className="avatar-link" aria-label={can("/profile") ? "Your profile" : "Dashboard"}>
               <Avatar name={state.customer.name} photo={state.profile.photo} />
             </Link>
+            <button type="button" className="mast-signoff" onClick={signOut}>Sign off</button>
           </div>
         </div>
       </header>
@@ -114,7 +131,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         {tabs.slice(0, 2).map((t) => (
           <Link key={t.href} href={t.href} aria-current={path === t.href ? "page" : undefined}>{t.icon}{t.label}</Link>
         ))}
-        {can("/send") && <Link href="/send" className="tab-fab" aria-label="Send money" aria-current={path === "/send" ? "page" : undefined}>{ICONS.send}</Link>}
+        {can("/send") && <Link href="/send" aria-current={path === "/send" ? "page" : undefined}>{ICONS.send}Send</Link>}
         {tabs.slice(2).map((t) => (
           <Link key={t.href} href={t.href} aria-current={path === t.href ? "page" : undefined}>{t.icon}{t.label}</Link>
         ))}

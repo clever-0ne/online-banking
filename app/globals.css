@@ -838,3 +838,196 @@ label.tk-row { cursor: pointer; }
 .forgot-link { justify-self: end; margin-top: -6px; font-size: 0.84rem; font-weight: 600; color: var(--accent); text-decoration: none; }
 .forgot-link:hover { text-decoration: underline; }
 .link-inline { border: 0; padding: 0; background: none; font: inherit; color: var(--accent); font-weight: 600; cursor: pointer; text-decoration: underline; }
+
+/* =====================================================================================================
+   Bank theme. Overrides the earlier styles above: a plain, retail-bank look. White surfaces, thin borders,
+   small corner radii, one indigo for brand and actions, a solid masthead with the menu across the top,
+   and no glass, glows, gradients or floating cards. Light is the default; dark keeps the same shapes.
+   ===================================================================================================== */
+:root {
+  --bg: #F3F3F6; --surface: #FFFFFF; --surface-2: #F6F6F9; --surface-3: #ECECF1;
+  --ink: #1B1B24; --ink-2: #3E3E4D; --muted: #676778; --line: #DDDDE5; --line-strong: #C9C9D4;
+  --accent: #3127B4; --accent-hover: #241C8C; --accent-ink: #FFFFFF; --accent-soft: #EEEDFB;
+  --brand: #3127B4; --brand-deep: #241C8C; --brand-line: #7C4DF2;
+  --grad: #3127B4; --mauve: #3127B4; --mauve-strong: #5A50D0; --mauve-soft: #EEEDFB;
+  --teal: #12805C; --teal-strong: #12805C; --teal-soft: #E6F4EE;
+  --pos: #12805C; --pos-soft: #E6F4EE; --neg: #C62828; --neg-soft: #FCEBEB; --signal: #9A6700; --signal-soft: #FFF6DD;
+  --card-bg: #2B2B38;
+  --shadow-sm: 0 1px 2px rgb(20 20 40 / .06); --shadow: 0 1px 3px rgb(20 20 40 / .08); --shadow-lg: 0 12px 32px -12px rgb(20 20 40 / .3);
+  --float: 0 1px 2px rgb(20 20 40 / .05); --float-hover: 0 1px 2px rgb(20 20 40 / .05);
+  --glass: var(--surface); --glass-strong: var(--surface); --glass-border: var(--line);
+  --r-sm: 6px; --r: 8px; --r-lg: 10px;
+  --topbar-h: 64px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121219; --surface: #1B1B25; --surface-2: #22222E; --surface-3: #2A2A38; --ink: #ECECF3; --ink-2: #C9C9D6; --muted: #9696A8;
+    --line: #2E2E3C; --line-strong: #3B3B4C; --accent: #9A93FF; --accent-hover: #B2ACFF; --accent-ink: #121219; --accent-soft: #26244A;
+    --brand: #241C8C; --brand-deep: #1A1468; --mauve: #9A93FF; --mauve-soft: #26244A; --teal: #4CC994; --teal-strong: #4CC994; --teal-soft: #163428;
+    --pos: #4CC994; --pos-soft: #163428; --neg: #FF7A7A; --neg-soft: #3E1C1E; --signal: #F0B454; --signal-soft: #3A2C12;
+    --glass: var(--surface); --glass-strong: var(--surface); --glass-border: var(--line);
+    --float: none; --float-hover: none; --shadow-sm: none; --shadow: none;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121219; --surface: #1B1B25; --surface-2: #22222E; --surface-3: #2A2A38; --ink: #ECECF3; --ink-2: #C9C9D6; --muted: #9696A8;
+  --line: #2E2E3C; --line-strong: #3B3B4C; --accent: #9A93FF; --accent-hover: #B2ACFF; --accent-ink: #121219; --accent-soft: #26244A;
+  --brand: #241C8C; --brand-deep: #1A1468; --mauve: #9A93FF; --mauve-soft: #26244A; --teal: #4CC994; --teal-strong: #4CC994; --teal-soft: #163428;
+  --pos: #4CC994; --pos-soft: #163428; --neg: #FF7A7A; --neg-soft: #3E1C1E; --signal: #F0B454; --signal-soft: #3A2C12;
+  --glass: var(--surface); --glass-strong: var(--surface); --glass-border: var(--line);
+  --float: none; --float-hover: none; --shadow-sm: none; --shadow: none;
+}
+
+/* Type: one sturdy sans-serif, numbers in the same face with even widths. */
+body { font-size: 16px; line-height: 1.5; }
+h1, h2, h3 { letter-spacing: 0; font-weight: 600; }
+h1 { font-size: clamp(1.55rem, 3vw, 1.9rem); }
+h2 { font-size: 1.15rem; }
+.num { font-family: var(--f-sans); font-variant-numeric: tabular-nums; letter-spacing: 0; }
+.label, .eyebrow, .nav-title { letter-spacing: .04em; }
+
+/* No glass, glow or floating: flat surfaces with thin borders. */
+.bg-glow, .splash::before, .auth-bg { display: none !important; }
+.glass, .panel, .tx-card, .mini-acct, .tk-panel, .recipient, .keypad, .receipt, .pick, .add-card, .balance-chip, .notice, .who, .stat, .feature, .auth-card, .stats-strip, .phone {
+  backdrop-filter: none !important; background-color: var(--surface); border: 1px solid var(--line); box-shadow: var(--float); transform: none !important;
+}
+.notice { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 25%, transparent); }
+.notice.warn { background: var(--signal-soft); border-color: color-mix(in srgb, var(--signal) 40%, transparent); }
+.panel, .tk-panel { border-radius: var(--r-lg); }
+.logo-anim { filter: none; }
+
+/* Buttons: solid indigo pills; secondary is outlined. */
+.btn { border-radius: 999px; font-weight: 600; padding: 10px 22px; }
+.btn.ghost { background: transparent; color: var(--accent); border: 1.5px solid var(--accent); }
+.btn.ghost:hover { background: var(--accent-soft); }
+.tk-btn { border-radius: 999px; border-color: var(--line-strong); background: var(--surface); }
+.tk-btn:hover { border-color: var(--accent); color: var(--accent); }
+.input { border-radius: var(--r-sm); }
+.seg, .seg button { border-radius: var(--r-sm); }
+.row-ico { border-radius: 50%; background: var(--accent-soft); color: var(--accent); }
+.avatar { background: var(--accent-soft); color: var(--accent); }
+.avatar.xl { box-shadow: 0 0 0 4px var(--surface), 0 0 0 5px var(--line-strong); background: var(--accent-soft); color: var(--accent); }
+.who .avatar { box-shadow: none; }
+.tk .switch input:checked + span { background: var(--accent); }
+.tk .seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.tk-pill.teal { background: var(--pos-soft); color: var(--pos); }
+.tk-pill.mauve { background: var(--surface-3); color: var(--ink-2); }
+
+/* Masthead: solid brand bar with the logo, the menu across the top, and Sign off. */
+.topbar.mast { background: var(--brand) !important; backdrop-filter: none !important; border-bottom: 0; color: #fff; box-shadow: inset 0 -3px 0 var(--brand-line); }
+.mast .topbar-in { max-width: 1240px; gap: 8px; }
+.mast .brand { color: #fff; font-size: 1.15rem; font-weight: 700; margin-right: 18px; }
+.mast .icon-btn { color: #fff; }
+.mast .icon-btn:hover { background: rgb(255 255 255 / .12); }
+.mast .icon-btn .dot { box-shadow: 0 0 0 2px var(--brand); background: #FFC94D; }
+.mast .avatar-link .avatar { background: rgb(255 255 255 / .16); color: #fff; }
+.mast .avatar-link:hover .avatar { box-shadow: 0 0 0 2px #fff; }
+.mast-signoff { margin-left: 8px; border: 1.5px solid rgb(255 255 255 / .6); background: transparent; color: #fff; border-radius: 999px; padding: 6px 16px; font-weight: 600; font-size: 0.9rem; cursor: pointer; }
+.mast-signoff:hover { border-color: #fff; background: rgb(255 255 255 / .1); }
+.mast-nav { display: flex; align-items: stretch; height: 100%; }
+.mn-group { position: relative; display: flex; }
+.mn-top { display: flex; align-items: center; padding: 0 14px; color: #fff; text-decoration: none; font-weight: 600; font-size: 0.97rem; border-bottom: 3px solid transparent; }
+.mn-top:hover, .mn-group:focus-within .mn-top { background: rgb(255 255 255 / .1); }
+.mn-top[aria-current] { border-bottom-color: #fff; }
+.mn-drop { position: absolute; top: 100%; left: 0; min-width: 240px; background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--brand-line); border-radius: 0 0 var(--r) var(--r); box-shadow: var(--shadow-lg); padding: 8px; display: none; z-index: 40; }
+.mn-group:hover .mn-drop, .mn-group:focus-within .mn-drop { display: grid; }
+.mn-drop a { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: var(--r-sm); color: var(--ink); text-decoration: none; font-weight: 500; }
+.mn-drop a:hover { background: var(--surface-2); color: var(--accent); }
+.mn-drop a[aria-current="page"] { color: var(--accent); font-weight: 600; background: var(--accent-soft); }
+.mn-drop svg { width: 20px; height: 20px; color: var(--accent); flex: none; }
+@media (min-width: 1081px) { .mast-menu { display: none; } }
+@media (max-width: 1080px) { .mast-nav, .mast-signoff { display: none; } }
+
+/* Slide-out menu (phones and tablets): plain list, current page underlined in brand colour. */
+.drawer { background: var(--surface) !important; backdrop-filter: none !important; border-right: 1px solid var(--line); }
+.who { background: var(--surface-2); border-radius: var(--r); }
+.nav a { border-radius: var(--r-sm); }
+.nav a[aria-current="page"] { background: var(--accent-soft); color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
+.nav svg { color: var(--accent); }
+
+/* Phone tab bar: docked to the bottom edge, flat, five equal tabs. */
+@media (max-width: 760px) {
+  :root { --tabbar-h: 64px; }
+  .tabbar { left: 0 !important; right: 0 !important; bottom: 0 !important; height: calc(64px + env(safe-area-inset-bottom, 0px)) !important; padding: 0 0 env(safe-area-inset-bottom, 0px) !important;
+    border-radius: 0 !important; background: var(--surface) !important; border: 0 !important; border-top: 1px solid var(--line) !important; box-shadow: 0 -2px 10px rgb(20 20 40 / .06) !important; backdrop-filter: none !important; }
+  .tabbar a { border-radius: 0; font-size: 0.72rem; }
+  .tabbar a[aria-current="page"] { color: var(--accent); box-shadow: inset 0 3px 0 var(--accent); }
+  .tabbar a[aria-current="page"]:not(.tab-fab)::after { display: none; }
+}
+
+/* Loading screen: plain. */
+.splash { background: var(--bg); }
+
+/* ---------- Account summary (dashboard) ---------- */
+.summary { display: grid; gap: 20px; }
+.summary-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; padding-bottom: 4px; border-bottom: 1px solid var(--line); padding-bottom: 18px; }
+.summary-head h1 { font-size: clamp(1.5rem, 3vw, 1.85rem); }
+.summary-grid { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; align-items: start; }
+.summary-main, .summary-side { display: grid; gap: 20px; min-width: 0; }
+.acct-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--line); background: var(--surface-2); border-radius: var(--r-lg) var(--r-lg) 0 0; }
+.acct-head h2 { font-size: 1.1rem; }
+.acct-list { list-style: none; margin: 0; padding: 0; }
+.acct-list li + li { border-top: 1px solid var(--line); }
+.acct-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 16px 20px; text-decoration: none; color: inherit; }
+.acct-row:hover { background: var(--surface-2); }
+.acct-row:hover b { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+.acct-name { display: grid; gap: 2px; min-width: 0; }
+.acct-name b { font-weight: 600; color: var(--accent); }
+.acct-name .muted { font-size: 0.88rem; }
+.acct-bal { font-size: 1.25rem; font-weight: 600; white-space: nowrap; }
+.acct-total { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 14px 20px; border-top: 1px solid var(--line-strong); font-size: 0.95rem; color: var(--ink-2); }
+.acct-total b { font-size: 1.05rem; color: var(--ink); }
+.summary-tx { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+.summary-tx th { text-align: left; font-size: 0.78rem; font-weight: 600; color: var(--muted); padding: 10px 20px; border-bottom: 1px solid var(--line); }
+.summary-tx td { padding: 12px 20px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.summary-tx tr:last-child td { border-bottom: 0; }
+.summary-tx .r { text-align: right; white-space: nowrap; }
+.summary-tx .tx-date { color: var(--muted); white-space: nowrap; width: 1%; }
+.summary-tx b { font-weight: 600; }
+.block { display: block; }
+.side-title { font-size: 1.05rem; margin-bottom: 10px; }
+.side-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.quick-list, .side-list { list-style: none; margin: 0; padding: 0; }
+.quick-list li + li, .side-list li + li { border-top: 1px solid var(--line); }
+.quick-list a { display: flex; align-items: center; gap: 12px; padding: 11px 2px; text-decoration: none; color: var(--ink); font-weight: 600; }
+.quick-list a:hover { color: var(--accent); }
+.quick-ico { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); flex: none; }
+.quick-ico svg { width: 18px; height: 18px; }
+.quick-chev { margin-left: auto; color: var(--muted); display: grid; }
+.quick-chev svg { width: 16px; height: 16px; }
+.side-list li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; }
+.side-list b { font-weight: 600; font-size: 0.95rem; }
+.goal-line { flex-wrap: wrap; }
+.goal-bar { flex-basis: 100%; height: 6px; border-radius: 99px; background: var(--surface-3); overflow: hidden; }
+.goal-bar i { display: block; height: 100%; background: var(--accent); }
+.score-line { display: flex; align-items: baseline; gap: 10px; }
+.score-line b { font-size: 1.8rem; font-weight: 700; }
+@media (max-width: 980px) { .summary-grid { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 560px) {
+  .acct-row, .acct-head, .acct-total, .summary-tx td, .summary-tx th { padding-left: 14px; padding-right: 14px; }
+  .acct-bal { font-size: 1.1rem; }
+  .summary-tx th:first-child, .summary-tx td.tx-date { display: none; }
+}
+
+/* ---------- Sign-in and sign-up: white page, masthead strip, plain card ---------- */
+.auth { background: var(--bg); }
+.auth::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 64px; background: var(--brand); box-shadow: inset 0 -3px 0 var(--brand-line); z-index: 0; }
+.auth-top { position: relative; z-index: 1; height: 32px; }
+.auth-home { color: #fff; }
+.auth-top .icon-btn { color: #fff; }
+.auth-top .icon-btn:hover { background: rgb(255 255 255 / .12); }
+.auth-center { position: relative; z-index: 1; padding-top: 44px; }
+.auth-card { border-radius: var(--r-lg); box-shadow: var(--shadow); animation: none; }
+.auth-card > svg { display: none; }
+.auth-card h1 { font-size: 1.6rem; }
+
+/* Card picture: a plain card face, no decorative circles or glow. */
+.bankcard { border-radius: 14px; box-shadow: 0 2px 6px rgb(20 20 40 / .18) !important; }
+.bankcard.debit { background: #2B2392; }
+.bankcard.credit { background: #2B2B38; }
+.bankcard::before, .bankcard::after { display: none; }
+.bc-pan { font-family: var(--f-sans); font-variant-numeric: tabular-nums; letter-spacing: .12em; }
+.bc-chip { border-radius: 4px; background: #D9C27A; }
+.bc-chip::after { display: none; }
+.reminder { border-radius: var(--r-lg); box-shadow: var(--shadow-lg); }
+.reminder-ico { border-radius: 50%; }

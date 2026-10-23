@@ -1,200 +1,169 @@
 "use client";
 
+// Account summary: every account in rows with its balance, the card with what's due, recent activity and
+// quick links, the way a retail bank lays out its first page after sign-on.
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import { Avatar } from "@/components/Avatar";
 import { useBank } from "@/components/BankProvider";
-import { catIcon } from "@/components/catIcons";
-import { BalanceLine, Donut, GroupedBars, Ring } from "@/components/charts";
-import { ICONS, OPEN_MENU_EVENT } from "@/components/nav";
-import { Progress } from "@/components/ui";
-import { addMonths, daysUntil, fmt, fromISO, longDate, mask, monthKey, todayISO } from "@/lib/format";
-import { acct, alertFeed, available, balanceSeries, bandOf, scheduledLabel, sortedTx, spendingInMonth } from "@/lib/logic";
-import type { BankState, Card } from "@/lib/types";
+import { ICONS } from "@/components/nav";
+import { daysUntil, fmt, fromISO, longDate, mask } from "@/lib/format";
+import { acct, alertFeed, available, bandOf, scheduledLabel, sortedTx } from "@/lib/logic";
 
-/** Money in and out per calendar month, oldest first. */
-function monthlyFlow(s: BankState, months = 4) {
-  return Array.from({ length: months }, (_, k) => {
-    const m = monthKey(addMonths(todayISO(), k - (months - 1)));
-    const tx = s.tx.filter((t) => monthKey(t.date) === m && t.cat !== "Transfers");
-    return {
-      label: fromISO(m + "-01").toLocaleDateString("en-US", { month: "short" }),
-      a: Math.round(tx.filter((t) => t.amount > 0).reduce((x, t) => x + t.amount, 0)),
-      b: Math.round(tx.filter((t) => t.amount < 0).reduce((x, t) => x - t.amount, 0)),
-    };
-  });
-}
+const shortDate = (iso: string) => fromISO(iso).toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "2-digit" });
 
 export default function DashboardPage() {
   const { state, can } = useBank();
-  const [cardId, setCardId] = useState<Card["id"]>("debit");
-  const [hidden, setHidden] = useState(false);
-  const card = state.cards.find((c) => c.id === cardId)!;
-  const linked = acct(state, card.linked);
-  const balance = card.id === "credit" ? available(state, "cc") : available(state, linked.id);
-  const recent = sortedTx(state.tx).slice(0, 5);
-  const warnings = alertFeed(state).filter((a) => a.tone === "warn");
   const first = state.profile.preferredName || state.customer.name.split(" ")[0];
-  const money = (n: number) => (hidden ? "••••" : fmt(n));
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  const today = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
 
-  const flow = useMemo(() => monthlyFlow(state), [state]);
-  const thisMonth = flow[flow.length - 1];
-  const spend = useMemo(() => spendingInMonth(state), [state]);
-  const spendTop = [...spend.slice(0, 5), ...(spend.length > 5 ? [["Other", spend.slice(5).reduce((a, [, v]) => a + v, 0)] as [string, number]] : [])];
-  const spendTotal = spend.reduce((a, [, v]) => a + v, 0);
-  const saved = state.tx.filter((t) => t.acct === "sav" && t.amount > 0 && monthKey(t.date) === monthKey(todayISO())).reduce((a, t) => a + t.amount, 0);
-  const budgets = Object.entries(state.budgets).map(([c, b]) => ({ c, b, s: spend.find(([k]) => k === c)?.[1] ?? 0 })).sort((x, y) => y.s / y.b - x.s / x.b).slice(0, 4);
+  const cash = state.accounts.filter((a) => a.kind !== "credit");
+  const cashTotal = cash.reduce((s, a) => s + available(state, a.id), 0);
+  const cc = acct(state, "cc");
+  const owed = Math.max(0, -cc.balance);
+  const recent = sortedTx(state.tx).slice(0, 6);
+  const warnings = alertFeed(state).filter((a) => a.tone === "warn");
   const upcoming = [...state.scheduled].sort((a, b) => a.date.localeCompare(b.date)).slice(0, 4);
   const score = state.credit.score;
+  const name = (id: string) => state.accounts.find((a) => a.id === id)?.name ?? "";
+
+  const actions = [
+    ["/transfer", "Transfer money", ICONS.transfer],
+    ["/send", "Send money", ICONS.send],
+    ["/bills", "Pay a bill", ICONS.bill],
+    ["/deposit", "Deposit", ICONS.topup],
+    ["/withdraw", "Withdraw", ICONS.request],
+    ["/statements", "Statements", ICONS.note],
+  ].filter(([href]) => can(href as string)) as [string, string, React.ReactNode][];
 
   return (
-    <div className="bento">
-      {/* Wallet: greeting, card, actions, quick transfer */}
-      <section className="panel glass t-wallet">
-        <div className="home-hello">
-          <Avatar name={state.customer.name} photo={state.profile.photo} />
-          <div><span className="muted">Welcome back,</span><b>{first}</b></div>
+    <div className="summary">
+      <div className="summary-head">
+        <div>
+          <h1>{greeting}, {first}</h1>
+          <p className="muted">{today}</p>
         </div>
-
-        <div className={`balance-card${card.locked ? " locked" : ""}`} role="group" aria-label={`${card.name} ending ${card.last4}`}>
-          <div className="bal-top">
-            <span className="bal-label">{card.id === "credit" ? "Available credit" : "Current balance"}</span>
-            <span className="bal-logo" aria-hidden="true"><i /><i /></span>
-          </div>
-          <div className="bal-row">
-            <span className="bal-amount">{hidden ? "$ ••••••" : fmt(balance)}</span>
-            <button type="button" className="bal-eye" onClick={() => setHidden((h) => !h)} aria-label={hidden ? "Show amounts" : "Hide amounts"} aria-pressed={hidden}>
-              {hidden ? ICONS.eyeOff : ICONS.eye}
-            </button>
-          </div>
-          <div className="bal-pan">•••• •••• •••• {card.last4}</div>
-          <div className="bal-foot">
-            <span>{card.id === "debit" ? "Debit card" : "Cash Back Visa"}{card.locked ? " · Turned off" : ""}</span>
-            <span>{card.exp}</span>
-          </div>
+        <div className="actions">
+          {can("/transfer") && <Link className="btn" href="/transfer">Transfer &amp; pay</Link>}
+          {can("/deposit") && <Link className="btn ghost" href="/deposit">Deposit</Link>}
         </div>
-        <div className="card-switch" role="group" aria-label="Choose card">
-          {state.cards.map((c) => (
-            <button key={c.id} type="button" aria-pressed={c.id === cardId} aria-label={c.id === "debit" ? "Debit card" : "Credit card"} onClick={() => setCardId(c.id)} />
-          ))}
-        </div>
-
-        <div className="actions-4">
-          {can("/deposit") && <Link href="/deposit" className="act"><span>{ICONS.topup}</span>Deposit</Link>}
-          {can("/send") && <Link href="/send" className="act"><span>{ICONS.send}</span>Send</Link>}
-          {can("/send") && <Link href="/send?mode=request" className="act"><span>{ICONS.request}</span>Request</Link>}
-          <button type="button" className="act" onClick={() => window.dispatchEvent(new Event(OPEN_MENU_EVENT))}><span>{ICONS.more}</span>More</button>
-        </div>
-
-        {can("/send") && <div>
-          <div className="sec-head"><h2>Quick Transfer</h2><Link className="see-all" href="/send">See all</Link></div>
-          <div className="quick-row">
-            <Link href="/send?new=1" className="quick-person add"><span className="avatar">+</span><span>Add</span></Link>
-            {state.contacts.map((c) => (
-              <Link key={c.id} href={`/send?to=${c.id}`} className="quick-person"><Avatar name={c.name} /><span>{c.name.split(" ")[0]}</span></Link>
-            ))}
-          </div>
-        </div>}
-
-        {warnings.length > 0 && <Link href="/alerts" className="notice warn"><b>{warnings[0].title}.</b> {warnings[0].body}</Link>}
-      </section>
-
-      {/* This month */}
-      <div className="t-stats stat-tiles">
-        <div className="stat glass"><span className="stat-ico in">{ICONS.request}</span><span className="muted">Income this month</span><b>{money(thisMonth.a)}</b></div>
-        <div className="stat glass"><span className="stat-ico out">{ICONS.send}</span><span className="muted">Spent this month</span><b>{money(thisMonth.b)}</b></div>
-        <div className="stat glass"><span className="stat-ico save">{ICONS.topup}</span><span className="muted">Saved this month</span><b>{money(saved)}</b></div>
-        <div className="stat glass"><span className="stat-ico net">{ICONS.transfer}</span><span className="muted">Net this month</span><b className={thisMonth.a - thisMonth.b >= 0 ? "pos" : "bad-text"}>{hidden ? "••••" : (thisMonth.a - thisMonth.b >= 0 ? "+" : "−") + fmt(Math.abs(thisMonth.a - thisMonth.b))}</b></div>
       </div>
 
-      <section className="panel glass t-balance">
-        <div className="sec-head"><h2>Checking balance</h2><span className="muted small">Last 30 days</span></div>
-        <BalanceLine points={balanceSeries(state, "chk", 30)} label="Checking balance, last 30 days" height={230} />
-      </section>
+      {warnings.length > 0 && (
+        <Link href={can("/alerts") ? "/alerts" : "/dashboard"} className="notice warn"><b>{warnings[0].title}.</b> {warnings[0].body}</Link>
+      )}
 
-      <section className="panel glass t-flow">
-        <div className="sec-head"><h2>Income vs spending</h2><span className="muted small">Last 4 months</span></div>
-        <GroupedBars data={flow} label="Income and spending per month, last 4 months" />
-      </section>
+      <div className="summary-grid">
+        <div className="summary-main">
+          {/* Cash accounts */}
+          <section className="panel flush">
+            <div className="acct-head"><h2>Cash accounts</h2><span className="muted small">Available balance</span></div>
+            <ul className="acct-list">
+              {cash.map((a) => (
+                <li key={a.id}>
+                  <Link href={can("/activity") ? "/activity" : "/dashboard"} className="acct-row">
+                    <span className="acct-name"><b>{a.name}</b><span className="muted">{mask(a.last4)}{a.apy ? ` · ${a.apy}% APY` : ""}{a.held ? ` · ${fmt(a.held)} on hold` : ""}</span></span>
+                    <span className="acct-bal num">{fmt(available(state, a.id))}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <div className="acct-total"><span>Total available</span><b className="num">{fmt(cashTotal)}</b></div>
+          </section>
 
-      <section className="panel glass t-donut">
-        <div className="sec-head"><h2>Spending by category</h2>{can("/budget") && <Link className="see-all" href="/budget">Budget</Link>}</div>
-        {spendTop.length ? <Donut data={spendTop} total={spendTotal} label="Spending by category this month" /> : <p className="empty">No spending yet this month.</p>}
-      </section>
-
-      <section className="panel glass t-tx">
-        <div className="sec-head"><h2>Recent Transaction</h2>{can("/activity") && <Link className="see-all" href="/activity">See all</Link>}</div>
-        <div className="tx-cards">
-          {recent.length === 0 && <p className="empty">No transactions yet. Add money to get started.</p>}
-          {recent.map((t) => (
-            <Link href="/activity" className="tx-card" key={t.id}>
-              <span className="row-ico">{catIcon(t.cat)}</span>
-              <div><b>{t.payee}</b><span className="muted">{fromISO(t.date).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" })} · {t.cat}</span></div>
-              <span className={`amt${t.amount > 0 ? " pos" : ""}`}>
-                {hidden ? "••••" : `${t.amount > 0 ? "+" : "−"}${fmt(Math.abs(t.amount))}`}
-                {t.status === "pending" && <small>Pending</small>}
-              </span>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      <section className="panel glass t-up">
-        <div className="sec-head"><h2>Upcoming</h2>{can("/bills") && <Link className="see-all" href="/bills">Bill pay</Link>}</div>
-        <div className="upcoming-list">
-          {upcoming.length === 0 && <p className="empty">Nothing scheduled.</p>}
-          {upcoming.map((s) => {
-            const d = daysUntil(s.date);
-            return (
-              <div key={s.id} className="up-row">
-                <span className="date-chip"><b>{fromISO(s.date).getDate()}</b><span>{fromISO(s.date).toLocaleDateString("en-US", { month: "short" })}</span></span>
-                <div><b>{scheduledLabel(state, s)}</b><span className="muted">{d === 0 ? "Today" : `In ${d} day${d === 1 ? "" : "s"}`}{s.repeat !== "once" ? ` · ${s.repeat}` : ""}</span></div>
-                <span className="num">{money(s.amount)}</span>
-              </div>
-            );
-          })}
-        </div>
-        <p className="hint tile-foot">{acct(state, "cc").balance < 0 && acct(state, "cc").dueDate ? `Card payment due ${longDate(acct(state, "cc").dueDate!)}` : "No card balance due"}</p>
-      </section>
-
-      <section className="panel glass t-bud">
-        <div className="sec-head"><h2>Budgets</h2>{can("/budget") && <Link className="see-all" href="/budget">Manage</Link>}</div>
-        <div className="budget-mini">
-          {budgets.length === 0 && <p className="empty">No budgets set. <Link href="/budget">Create one</Link></p>}
-          {budgets.map(({ c, b, s }) => (
-            <div key={c}>
-              <div className="bm-top"><span className="row-ico sm">{catIcon(c)}</span><b>{c}</b><span className="muted">{money(s)} / {fmt(b)}</span></div>
-              <Progress value={s} max={b} tone={s > b ? "bad" : s / b > 0.85 ? "warn" : undefined} />
+          {/* Credit card */}
+          <section className="panel flush">
+            <div className="acct-head"><h2>Credit cards</h2><span className="muted small">Current balance</span></div>
+            <ul className="acct-list">
+              <li>
+                <Link href={can("/cards") ? "/cards" : "/dashboard"} className="acct-row">
+                  <span className="acct-name"><b>{cc.name}</b><span className="muted">{mask(cc.last4)} · {fmt(available(state, "cc"))} available of {fmt(cc.limit ?? 0)}</span></span>
+                  <span className="acct-bal num">{fmt(owed)}</span>
+                </Link>
+              </li>
+            </ul>
+            <div className="acct-total">
+              <span>{owed > 0 && cc.dueDate ? <>Minimum payment {fmt(cc.minDue ?? 0)} due {longDate(cc.dueDate)}</> : "No payment due"}</span>
+              {owed > 0 && can("/transfer") && <Link className="see-all" href="/transfer">Make a payment</Link>}
             </div>
-          ))}
-        </div>
-      </section>
+          </section>
 
-      <section className="panel glass t-goals">
-        <div className="sec-head"><h2>Savings goals</h2>{can("/goals") && <Link className="see-all" href="/goals">All goals</Link>}</div>
-        <div className="goal-rings">
-          {state.goals.length === 0 && <p className="empty">No goals yet. <Link href="/goals">Start saving</Link></p>}
-          {state.goals.slice(0, 3).map((g, i) => (
-            <Link href="/goals" key={g.id} className="goal-ring">
-              <Ring value={g.saved} max={g.target} color={["var(--accent)", "var(--mauve-strong)", "var(--teal-strong)"][i]}><b>{Math.round((g.saved / g.target) * 100)}%</b></Ring>
-              <span>{g.name}</span>
-              <span className="muted small">{money(g.saved)}</span>
-            </Link>
-          ))}
+          {/* Recent activity */}
+          <section className="panel flush">
+            <div className="acct-head"><h2>Recent activity</h2>{can("/activity") && <Link className="see-all" href="/activity">View all activity</Link>}</div>
+            {recent.length === 0 ? (
+              <p className="empty">No activity yet. Make a deposit to get started.</p>
+            ) : (
+              <table className="summary-tx">
+                <thead><tr><th>Date</th><th>Description</th><th className="r">Amount</th></tr></thead>
+                <tbody>
+                  {recent.map((t) => (
+                    <tr key={t.id}>
+                      <td className="tx-date">{shortDate(t.date)}</td>
+                      <td>
+                        <b>{t.payee}</b>
+                        <span className="muted small block">{name(t.acct)}{t.status === "pending" ? " · Pending" : ""}</span>
+                      </td>
+                      <td className={`r num${t.amount > 0 ? " pos" : ""}`}>{t.amount > 0 ? "+" : "−"}{fmt(Math.abs(t.amount))}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </section>
         </div>
-      </section>
 
-      <section className="panel glass t-credit credit-mini">
-        <div className="sec-head"><h2>Credit score</h2>{can("/credit") && <Link className="see-all" href="/credit">Details</Link>}</div>
-        <div className="cm-body">
-          <Ring value={score === null ? 0 : score - 300} max={550} size={96} color="var(--teal-strong)"><b className="cm-score">{score ?? "—"}</b></Ring>
-          <div>
-            <b>{score === null ? "Not available yet" : bandOf(score)}</b>
-            {score !== null && state.credit.history.length > 1 && <span className="muted">{score >= state.credit.history[0].score ? "Up" : "Down"} {Math.abs(score - state.credit.history[0].score)} points in {state.credit.history.length} months</span>}
-            <span className="muted">Card use {Math.round(((acct(state, "cc").limit ?? 0) - available(state, "cc")) / (acct(state, "cc").limit ?? 1) * 100)}% · {mask(acct(state, "cc").last4)}</span>
-          </div>
-        </div>
-      </section>
+        <aside className="summary-side">
+          <section className="panel">
+            <h2 className="side-title">I want to…</h2>
+            <ul className="quick-list">
+              {actions.map(([href, label, icon]) => (
+                <li key={href}><Link href={href}><span className="quick-ico">{icon}</span>{label}<span className="quick-chev">{ICONS.arrow}</span></Link></li>
+              ))}
+            </ul>
+          </section>
+
+          <section className="panel">
+            <div className="side-head"><h2 className="side-title">Upcoming payments</h2>{can("/bills") && <Link className="see-all" href="/bills">Bill pay</Link>}</div>
+            {upcoming.length === 0 ? <p className="muted small">Nothing scheduled.</p> : (
+              <ul className="side-list">
+                {upcoming.map((s) => {
+                  const d = daysUntil(s.date);
+                  return (
+                    <li key={s.id}>
+                      <span><b>{scheduledLabel(state, s)}</b><span className="muted small block">{d === 0 ? "Today" : `${longDate(s.date)} · in ${d} day${d === 1 ? "" : "s"}`}</span></span>
+                      <span className="num">{fmt(s.amount)}</span>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </section>
+
+          {can("/goals") && (
+            <section className="panel">
+              <div className="side-head"><h2 className="side-title">Savings goals</h2><Link className="see-all" href="/goals">Manage</Link></div>
+              {state.goals.length === 0 ? <p className="muted small">No goals yet. <Link href="/goals">Set one up</Link>.</p> : (
+                <ul className="side-list">
+                  {state.goals.slice(0, 3).map((g) => (
+                    <li key={g.id} className="goal-line">
+                      <span><b>{g.name}</b><span className="muted small block">{fmt(g.saved)} of {fmt(g.target)}</span></span>
+                      <span className="goal-bar" aria-hidden="true"><i style={{ width: `${Math.min(100, (g.saved / g.target) * 100)}%` }} /></span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          )}
+
+          {can("/credit") && (
+            <section className="panel">
+              <div className="side-head"><h2 className="side-title">Credit score</h2><Link className="see-all" href="/credit">Details</Link></div>
+              <p className="score-line"><b className="num">{score ?? "—"}</b><span className="muted small">{score === null ? "Not available yet" : bandOf(score)}</span></p>
+            </section>
+          )}
+        </aside>
+      </div>
     </div>
   );
 }

@@ -112,3 +112,17 @@ textarea.input { resize: vertical; font: inherit; }
 .setup-dot { width: 22px; height: 22px; flex: none; border-radius: 50%; display: grid; place-items: center; font-size: 0.75rem; font-weight: 800; }
 .setup-dot.ok { background: var(--pos-soft); color: var(--pos); }
 .setup-dot.bad { background: var(--neg-soft); color: var(--neg); }
+
+/* Staff bar: the same solid masthead as the customer site. */
+.adm-bar { background: var(--brand) !important; backdrop-filter: none; border-bottom: 0; box-shadow: inset 0 -3px 0 var(--brand-line); color: #fff; }
+.adm-bar .brand { color: #fff; }
+.adm-bar .adm-badge { background: #fff; color: var(--brand); }
+.adm-bar .adm-nav a { color: #fff; border-radius: 0; padding: 21px 12px; border-bottom: 3px solid transparent; }
+.adm-bar .adm-nav a:hover { background: rgb(255 255 255 / .1); }
+.adm-bar .adm-nav a[aria-current="page"] { background: transparent; color: #fff; border-bottom-color: #fff; }
+.adm-bar .adm-me { color: #fff; }
+.adm-bar .adm-me .avatar { background: rgb(255 255 255 / .16); color: #fff; }
+.adm-bar .icon-btn { color: #fff; }
+.adm-bar .icon-btn:hover { background: rgb(255 255 255 / .12); }
+.adm-bar .btn.ghost { color: #fff; border-color: rgb(255 255 255 / .6); }
+.adm-bar .btn.ghost:hover { background: rgb(255 255 255 / .1); border-color: #fff; }
