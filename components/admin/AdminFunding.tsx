@@ -4,8 +4,9 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { PushToggle } from "../PushToggle";
+import { DepositAddresses } from "./DepositAddresses";
 import { when } from "./shared";
-import { addressProblem, ASSETS, type Asset, type DepositAddress } from "@/lib/funding";
+import type { DepositAddress } from "@/lib/funding";
 import type { QueueItem } from "@/lib/server/funding";
 import { fmt } from "@/lib/format";
 
@@ -16,43 +17,6 @@ async function send(url: string, method: "PUT" | "PATCH", body: object) {
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || "Something went wrong.");
   return data;
-}
-
-function AddressRow({ asset, network, current, base, onSaved }: { asset: Asset; network: string; current?: DepositAddress; base: string; onSaved: (a: DepositAddress[]) => void }) {
-  const [value, setValue] = useState(current?.address ?? "");
-  const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState<{ bad: boolean; text: string } | null>(null);
-  useEffect(() => setValue(current?.address ?? ""), [current?.address]);
-  const dirty = value.trim() !== (current?.address ?? "");
-
-  async function save(e: React.FormEvent) {
-    e.preventDefault();
-    const problem = value.trim() ? addressProblem(asset, value) : "";
-    if (problem) { setMsg({ bad: true, text: problem }); return; }
-    setBusy(true); setMsg(null);
-    try {
-      const d = await send(`${base}/api/funding`, "PUT", { asset, address: value.trim() });
-      onSaved(d.addresses);
-      setMsg({ bad: false, text: value.trim() ? "Saved. Customers see it now." : `${asset} deposits turned off.` });
-    } catch (err) {
-      setMsg({ bad: true, text: (err as Error).message });
-    } finally { setBusy(false); }
-  }
-
-  return (
-    <form className="adm-addr" onSubmit={save} noValidate>
-      <div className="adm-addr-head">
-        <b>{asset}</b><span className="muted small">{network}</span>
-        <span className={`pill ${current ? "good" : ""}`}>{current ? "Live" : "Off"}</span>
-      </div>
-      <div className="adm-addr-row">
-        <input className="input mono" value={value} onChange={(e) => setValue(e.target.value)} placeholder={asset === "BTC" ? "bc1… (leave empty to turn off)" : "0x… (leave empty to turn off)"} aria-label={`${asset} deposit address`} spellCheck={false} autoComplete="off" />
-        <button className="btn small" type="submit" disabled={busy || !dirty}>{busy ? "Saving…" : "Save"}</button>
-      </div>
-      {current && <span className="muted small">Updated {when(current.updatedAt)}</span>}
-      {msg && <span className={`hint ${msg.bad ? "bad" : ""}`} role="status">{msg.text}</span>}
-    </form>
-  );
 }
 
 function Item({ r, base, onDone, readOnly }: { r: QueueItem; base: string; onDone: (d: Data) => void; readOnly?: boolean }) {
@@ -132,14 +96,7 @@ export function AdminFunding({ base, initial }: { base: string; initial: Data })
         <PushToggle base={`${base}/api/push`} label="Notify me on this device" on="You'll get a notification for every new deposit and withdrawal" off="Get a notification for every new deposit and withdrawal" />
       </section>
 
-      <section className="panel glass">
-        <div className="sec-head"><h2>Deposit addresses</h2><span className="muted small">Customers see changes within seconds</span></div>
-        <div className="adm-addrs">
-          {ASSETS.map((a) => (
-            <AddressRow key={a.asset} asset={a.asset} network={a.network} current={data.addresses.find((x) => x.asset === a.asset)} base={base} onSaved={(addresses) => setData((x) => ({ ...x, addresses }))} />
-          ))}
-        </div>
-      </section>
+      <DepositAddresses base={base} initial={data.addresses} onChange={(addresses) => setData((x) => ({ ...x, addresses }))} />
 
       <section className="panel glass">
         <div className="sec-head"><h2>Waiting for approval</h2><span className="pill pending">{data.pending.length}</span></div>

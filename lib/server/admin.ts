@@ -73,7 +73,7 @@ export async function userDetail(id: string): Promise<AdminUserDetail | null> {
   const u = await findById(id);
   if (!u) return null;
   const passkeys = (await one<{ n: number }>("SELECT COUNT(*) AS n FROM passkeys WHERE user_id = ?", id))!.n;
-  return { ...toPublic(u), bank: await summary(id), accounts: await staffAccounts(id), recentTx: await staffRecentTx(id), audit: await recentAudit(25, id), passkeys };
+  return { ...toPublic(u), bank: await summary(id), accounts: await staffAccounts(id), recentTx: await staffRecentTx(id), audit: [], passkeys };
 }
 
 export async function stats() {

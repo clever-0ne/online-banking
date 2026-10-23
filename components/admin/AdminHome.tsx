@@ -5,13 +5,15 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Avatar } from "../Avatar";
 import { ICONS } from "../nav";
-import { AuditList, StatusPill, adminRequest, day, when } from "./shared";
-import type { AdminUserRow, AuditEntry, stats as statsFn } from "@/lib/server/admin";
+import { DepositAddresses } from "./DepositAddresses";
+import { StatusPill, adminRequest, day, when } from "./shared";
+import type { AdminUserRow, stats as statsFn } from "@/lib/server/admin";
+import type { DepositAddress } from "@/lib/funding";
 import { fmt } from "@/lib/format";
 
 type Stats = Awaited<ReturnType<typeof statsFn>>;
 
-export function AdminHome({ base, initialUsers, stats, audit, setup }: { base: string; initialUsers: AdminUserRow[]; stats: Stats; audit: AuditEntry[]; setup?: React.ReactNode }) {
+export function AdminHome({ base, initialUsers, stats, addresses, setup }: { base: string; initialUsers: AdminUserRow[]; stats: Stats; addresses: DepositAddress[]; setup?: React.ReactNode }) {
   const router = useRouter();
   const [users, setUsers] = useState(initialUsers);
   const [q, setQ] = useState("");
@@ -53,6 +55,8 @@ export function AdminHome({ base, initialUsers, stats, audit, setup }: { base: s
       </div>
 
       {setup}
+
+      <div className="adm-addr-wide"><DepositAddresses base={base} initial={addresses} /></div>
 
       <div className="adm-stats">
         <div className="stat glass"><span className="stat-ico net">{ICONS.users}</span><span className="muted">Total users</span><b>{stats.total}</b></div>
@@ -118,10 +122,6 @@ export function AdminHome({ base, initialUsers, stats, audit, setup }: { base: s
                 <span key={d.day} title={`${d.day}: ${d.n}`} style={{ height: `${Math.max(4, (d.n / peak) * 100)}%` }} className={d.n ? "" : "zero"} />
               ))}
             </div>
-          </section>
-          <section className="panel glass">
-            <div className="sec-head"><h2>Recent activity</h2></div>
-            <AuditList items={audit} />
           </section>
         </aside>
       </div>

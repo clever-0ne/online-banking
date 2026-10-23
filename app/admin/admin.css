@@ -126,3 +126,7 @@ textarea.input { resize: vertical; font: inherit; }
 .adm-bar .icon-btn:hover { background: rgb(255 255 255 / .12); }
 .adm-bar .btn.ghost { color: #fff; border-color: rgb(255 255 255 / .6); }
 .adm-bar .btn.ghost:hover { background: rgb(255 255 255 / .1); border-color: #fff; }
+
+.adm-addr-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.adm-addr-actions .muted { margin-left: auto; }
+@media (min-width: 900px) { .adm-addr-wide .adm-addrs { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; } }

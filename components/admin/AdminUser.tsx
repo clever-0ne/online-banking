@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Avatar } from "../Avatar";
 import { ICONS } from "../nav";
-import { AuditList, StatusPill, adminRequest, day, when } from "./shared";
+import { StatusPill, adminRequest, day, when } from "./shared";
 import type { AdminUserDetail } from "@/lib/server/admin";
 import { fmt, mask, signed } from "@/lib/format";
 
@@ -218,10 +218,6 @@ export function AdminUser({ user, base, pageAccess }: { user: AdminUserDetail; b
             )}
           </section>
 
-          <section className="panel glass">
-            <div className="sec-head"><h2>Activity</h2></div>
-            <AuditList items={user.audit} showTarget={false} />
-          </section>
         </div>
       </div>
     </div>
