@@ -2,7 +2,7 @@
 
 import { useBank } from "@/components/BankProvider";
 import { PageHead, Switch } from "@/components/ui";
-import { fmt, shortDate } from "@/lib/format";
+import { fmt, shortDate, currencySymbol, fromUsd, toUsd } from "@/lib/format";
 import { alertFeed } from "@/lib/logic";
 import type { AlertPrefs } from "@/lib/types";
 
@@ -47,7 +47,7 @@ export default function AlertsPage() {
               <div>
                 <b>Low balance</b>
                 <p>When available checking money drops below</p>
-                <div className="inline-amt"><span>$</span><input className="input" type="number" min={0} step={50} aria-label="Low balance threshold" value={p.lowBalance.threshold} onChange={(e) => setPrefs((a) => ({ ...a, lowBalance: { ...a.lowBalance, threshold: Number(e.target.value) || 0 } }), "Threshold updated")} /></div>
+                <div className="inline-amt"><span>{currencySymbol()}</span><input className="input" type="number" min={0} aria-label="Low balance threshold" value={Math.round(fromUsd(p.lowBalance.threshold))} onChange={(e) => setPrefs((a) => ({ ...a, lowBalance: { ...a.lowBalance, threshold: toUsd(Number(e.target.value) || 0) } }), "Threshold updated")} /></div>
               </div>
               <Switch id="al-low" label="Low balance alerts" checked={p.lowBalance.on} onChange={(v) => setPrefs((a) => ({ ...a, lowBalance: { ...a.lowBalance, on: v } }))} />
             </div>
@@ -55,7 +55,7 @@ export default function AlertsPage() {
               <div>
                 <b>Large purchases</b>
                 <p>Card purchases of at least</p>
-                <div className="inline-amt"><span>$</span><input className="input" type="number" min={0} step={25} aria-label="Large purchase threshold" value={p.largePurchase.threshold} onChange={(e) => setPrefs((a) => ({ ...a, largePurchase: { ...a.largePurchase, threshold: Number(e.target.value) || 0 } }), "Threshold updated")} /></div>
+                <div className="inline-amt"><span>{currencySymbol()}</span><input className="input" type="number" min={0} aria-label="Large purchase threshold" value={Math.round(fromUsd(p.largePurchase.threshold))} onChange={(e) => setPrefs((a) => ({ ...a, largePurchase: { ...a.largePurchase, threshold: toUsd(Number(e.target.value) || 0) } }), "Threshold updated")} /></div>
               </div>
               <Switch id="al-large" label="Large purchase alerts" checked={p.largePurchase.on} onChange={(v) => setPrefs((a) => ({ ...a, largePurchase: { ...a.largePurchase, on: v } }))} />
             </div>

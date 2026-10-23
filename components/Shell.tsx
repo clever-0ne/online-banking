@@ -58,7 +58,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <button ref={menuBtnRef} type="button" className="icon-btn mast-menu" aria-label="Open menu" aria-expanded={open} aria-controls="drawer" onClick={() => setOpen(true)}>
             {ICONS.menu}
           </button>
-          <Link href="/dashboard" className="brand"><LogoMark size={28} /><span>Anchor Bank</span></Link>
+          <Link href="/dashboard" className="brand" translate="no"><LogoMark size={28} /><span>Anchor Bank</span></Link>
           {/* Desktop: the menu across the top, each heading opening its pages below it. */}
           <nav className="mast-nav" aria-label="Main">
             {groups.map((g) => {
@@ -92,7 +92,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
       <div className={`scrim${open ? " show" : ""}`} onClick={() => setOpen(false)} aria-hidden="true" />
       <aside id="drawer" ref={drawerRef} className={`drawer${open ? " open" : ""}`} aria-label="Menu" aria-hidden={!open} inert={!open}>
         <div className="drawer-head">
-          <Link href="/dashboard" className="brand"><LogoMark size={28} /><span>Anchor</span></Link>
+          <Link href="/dashboard" className="brand" translate="no"><LogoMark size={28} /><span>Anchor</span></Link>
           <button type="button" className="icon-btn" aria-label="Close menu" onClick={() => setOpen(false)}>{ICONS.close}</button>
         </div>
         <Link href={can("/profile") ? "/profile" : "/dashboard"} className="who">

@@ -1045,3 +1045,8 @@ h2 { font-size: 1.15rem; }
   .mast .avatar-link { margin-left: 4px; }
   .mast .avatar-link .avatar { width: 30px; height: 30px; font-size: 0.7rem; }
 }
+
+/* ---------- Automatic translation (Google Translate) ---------- */
+.goog-te-banner-frame, body > .skiptranslate, iframe.skiptranslate, #goog-gt-tt, .goog-te-balloon-frame, .VIpgJd-ZVi9od-ORHb-OEVmcd, .VIpgJd-ZVi9od-aZ2wEe-wOHMyf { display: none !important; }
+body { top: 0 !important; position: static !important; }
+.goog-text-highlight, font[style] { background: none !important; box-shadow: none !important; }

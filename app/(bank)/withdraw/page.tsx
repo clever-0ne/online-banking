@@ -6,7 +6,7 @@ import { FundingList } from "@/components/FundingList";
 import { AmountInput, PageHead, Tabs } from "@/components/ui";
 import { useFunding } from "@/components/useFunding";
 import { addressProblem, ASSETS, assetInfo, MIN_WITHDRAWAL, type Asset } from "@/lib/funding";
-import { fmt, mask } from "@/lib/format";
+import { fmt, mask, parseAmount } from "@/lib/format";
 import { available } from "@/lib/logic";
 
 export default function WithdrawPage() {
@@ -26,7 +26,7 @@ export default function WithdrawPage() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    const v = Number(amount);
+    const v = parseAmount(amount);
     const problem = addressProblem(asset, address);
     if (problem) { setError({ field: "address", text: problem }); return; }
     if (!amount || !Number.isFinite(v) || v <= 0) { setError({ field: "amount", text: "Enter an amount greater than $0." }); return; }
@@ -65,7 +65,7 @@ export default function WithdrawPage() {
               <span className="hint">{fmt(left)} available</span>
             </div>
             <div className="field">
-              <label htmlFor="wd-amount">Amount (US dollars)</label>
+              <label htmlFor="wd-amount">Amount</label>
               <AmountInput id="wd-amount" value={amount} onChange={setAmount} />
             </div>
           </div>

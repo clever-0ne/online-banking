@@ -8,7 +8,7 @@ export function AuthShell({ title, sub, children, aside }: { title: string; sub:
     <div className="auth">
       <div className="auth-bg" aria-hidden="true"><span /><span /></div>
       <header className="auth-top">
-        <Link href="/" className="auth-home" aria-label="Anchor Bank home"><LogoMark size={30} /><span>Anchor</span></Link>
+        <Link href="/" className="auth-home" translate="no" aria-label="Anchor Bank home"><LogoMark size={30} /><span>Anchor</span></Link>
         <ThemeToggle />
       </header>
       <main className="auth-center">

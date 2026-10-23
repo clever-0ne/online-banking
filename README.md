@@ -88,10 +88,19 @@ On iPhone, notifications work once Anchor Bank is added to the Home Screen and o
 Sent through Resend from `EMAIL_FROM`, in one Anchor-branded layout (`lib/server/email.ts`). Customers get:
 
 - a welcome email when they open an account
-- every alert they'd get as a push notification: new sign-ins (if Sign-in alerts is on), password and passkey changes, and deposits and withdrawals received, approved or declined, with the amount and status
+- every alert they'd get as a push notification: new sign-ins (if Sign-in alerts is on), password and passkey changes, deposits and withdrawals received, approved or declined, and confirmations for transfers, bill payments, Send money and savings-goal contributions, with the amount and status
 - password reset links (`/forgot-password`): one-time, valid for 30 minutes, only a hash is stored, and the reply is the same whether or not the email has an account
 
 Buttons in alert emails link to `APP_ORIGIN`, so set it on your host. With `STAFF_EMAIL` set, staff also get an email for each new deposit and withdrawal.
+
+## Language and currency
+
+The visitor's country comes from the host's location header (Vercel `x-vercel-ip-country`, Cloudflare `cf-ipcountry`, CloudFront) or, failing that, the region in their browser language (`app/api/locale`, `lib/locale.ts`).
+
+- **Language:** pages are translated into that country's language with Google Translate (`components/AutoTranslate.tsx`). Page text is sent to Google to translate. The bank's name and account names are left as they are. English-speaking countries see the original.
+- **Currency:** in the customer app, every amount is shown and typed in that country's currency, converted at the day's rate (open.er-api.com, cached 6 hours). Accounts are still held in US dollars: amounts typed are converted back to dollars before they're sent, and emails show dollars.
+- Customers can switch to English or US dollars in Profile → Preferences (saved on that device).
+- The staff console is never translated and always shows US dollars.
 
 ## Install as an app
 

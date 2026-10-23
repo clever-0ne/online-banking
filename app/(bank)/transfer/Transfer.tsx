@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useBank } from "@/components/BankProvider";
 import { AmountInput, PageHead, Success, Tabs } from "@/components/ui";
-import { addBusinessDays, fmt, longDate, mask, parseAmount, todayISO } from "@/lib/format";
+import { addBusinessDays, fmt, fromUsd, longDate, mask, parseAmount, todayISO } from "@/lib/format";
 import { acct, addExternal, available, routingValid, scheduledLabel } from "@/lib/logic";
 import type { AccountId, Repeat } from "@/lib/types";
 
@@ -65,9 +65,9 @@ export function Transfer({ initialTo }: { initialTo?: string }) {
     e.preventDefault();
     let err = "";
     if (!d.to) err = "Choose where the money should go.";
-    else if (!Number.isFinite(amountValue) || amountValue <= 0) err = toCard ? "There's nothing to pay on this choice. Pick another amount." : "Enter an amount in dollars, such as 50 or 50.25.";
+    else if (!Number.isFinite(amountValue) || amountValue <= 0) err = toCard ? "There's nothing to pay on this choice. Pick another amount." : "Enter an amount, such as 50 or 50.25.";
     else if (d.date === todayISO() && amountValue > available(state, d.from)) err = `That's more than the ${fmt(available(state, d.from))} available in ${acct(state, d.from).name}.`;
-    else if (d.mode === "ach" && amountValue > 10000) err = "Transfers to other banks are limited to $10,000 per day.";
+    else if (d.mode === "ach" && amountValue > 10000) err = `Transfers to other banks are limited to ${fmt(10000)} per day.`;
     else if (d.date < todayISO()) err = "Pick today or a future date.";
     setError(err);
     if (!err) setStep("review");
@@ -85,7 +85,7 @@ export function Transfer({ initialTo }: { initialTo?: string }) {
       setBusy(false);
     }
     // Freeze the amount: paying the card changes the minimum and statement figures it was picked from.
-    set({ cardAmount: "other", amount: amountValue.toFixed(2) });
+    set({ cardAmount: "other", amount: fromUsd(amountValue).toFixed(2) });
     setStep("done");
     toast(d.date === todayISO() ? "Transfer sent" : "Transfer scheduled");
   }

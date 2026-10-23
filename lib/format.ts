@@ -1,8 +1,27 @@
 // Money, date and small string helpers. All dates are local YYYY-MM-DD strings.
 
-const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
-export const fmt = (n: number) => usd.format(n);
-export const signed = (n: number) => (n > 0 ? "+" : n < 0 ? "−" : "") + usd.format(Math.abs(n));
+// Amounts are held in US dollars. In the customer app they're shown, and typed, in the visitor's local currency:
+// setDisplayCurrency() switches every fmt() call; toUsd() turns a typed local amount back into dollars.
+// The server and the staff console never switch, so they always show dollars.
+let display = { code: "USD", rate: 1, nf: new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }) };
+
+export function setDisplayCurrency(code: string, rate: number, locale?: string) {
+  if (!code || !(rate > 0)) code = "USD", rate = 1;
+  let nf: Intl.NumberFormat;
+  try { nf = new Intl.NumberFormat(locale || "en-US", { style: "currency", currency: code }); } catch { nf = new Intl.NumberFormat("en-US", { style: "currency", currency: code }); }
+  display = { code, rate: code === "USD" ? 1 : rate, nf };
+}
+export const displayCurrency = () => display.code;
+/** Dollars → the amount shown (local currency). */
+export const fromUsd = (usdAmount: number) => usdAmount * display.rate;
+/** A typed local amount → dollars, rounded to the cent. */
+export const toUsd = (local: number) => Math.round((local / display.rate) * 100) / 100;
+/** The local currency's symbol, e.g. "$", "€", "₦". */
+export function currencySymbol(): string {
+  return display.nf.formatToParts(0).find((p) => p.type === "currency")?.value ?? display.code;
+}
+export const fmt = (n: number) => display.nf.format(fromUsd(n));
+export const signed = (n: number) => (n > 0 ? "+" : n < 0 ? "−" : "") + display.nf.format(fromUsd(Math.abs(n)));
 export const round2 = (n: number) => Math.round(n * 100) / 100;
 
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -80,7 +99,10 @@ export const mask = (last4: string) => `••${last4}`;
 
 /** Parses "1,234.5" style input into a number with at most two decimals, or NaN. */
 export function parseAmount(raw: string): number {
-  const s = raw.replace(/[$,\s]/g, "");
+  let s = raw.replace(/[^\d.,]/g, "");
+  // A comma followed by one or two digits at the end is a decimal comma (10,50); other commas and dots group thousands.
+  if (/,\d{1,2}$/.test(s)) s = s.replace(/\./g, "").replace(",", ".");
+  else s = s.replace(/,/g, "");
   if (!/^\d+(\.\d{1,2})?$/.test(s)) return NaN;
-  return Number(s);
+  return toUsd(Number(s));
 }

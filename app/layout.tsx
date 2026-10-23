@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { JetBrains_Mono, Source_Sans_3 } from "next/font/google";
+import { AutoTranslate } from "@/components/AutoTranslate";
 import { PwaRegister } from "@/components/PwaRegister";
 import { themeBootScript } from "@/components/ThemeToggle";
 import "./globals.css";
@@ -32,6 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <div className="bg-glow" aria-hidden="true" />
         {children}
         <PwaRegister />
+        <AutoTranslate />
       </body>
     </html>
   );

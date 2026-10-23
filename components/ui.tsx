@@ -1,5 +1,7 @@
 "use client";
 
+import { currencySymbol } from "@/lib/format";
+
 // Small shared building blocks used across pages.
 
 export function PageHead({ title, sub, children }: { title: string; sub?: string; children?: React.ReactNode }) {
@@ -36,7 +38,7 @@ export function Tabs<T extends string>({ value, options, onChange, label }: { va
 export function AmountInput({ id, value, onChange, label }: { id: string; value: string; onChange: (v: string) => void; label?: string }) {
   return (
     <div className="amount-in">
-      <span>$</span>
+      <span>{currencySymbol()}</span>
       <input className="input" id={id} inputMode="decimal" autoComplete="off" placeholder="0.00" aria-label={label} value={value} onChange={(e) => onChange(e.target.value)} />
     </div>
   );

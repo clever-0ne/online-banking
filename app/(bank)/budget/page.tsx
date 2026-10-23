@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useBank } from "@/components/BankProvider";
 import { PageHead, Progress } from "@/components/ui";
-import { addMonths, fmt, fromISO, monthKey, monthLabel, todayISO } from "@/lib/format";
+import { addMonths, fmt, fromISO, monthKey, monthLabel, todayISO, currencySymbol, fromUsd, toUsd } from "@/lib/format";
 import { setBudget, spendingInMonth } from "@/lib/logic";
 
 export default function BudgetPage() {
@@ -25,11 +25,11 @@ export default function BudgetPage() {
   const elapsed = month === thisMonth ? t.getDate() / daysInMonth : 1;
 
   function save(cat: string) {
-    const v = Number(draft);
+    const v = toUsd(Number(draft));
     if (!Number.isFinite(v) || v < 0) return;
-    update((s) => setBudget(s, cat, Math.round(v)));
+    update((s) => setBudget(s, cat, v));
     setEditing(null);
-    toast(`${cat} budget set to ${fmt(Math.round(v))}`);
+    toast(`${cat} budget set to ${fmt(v)}`);
   }
 
   return (
@@ -64,12 +64,12 @@ export default function BudgetPage() {
                     <span className="muted"> of </span>
                     {editing === c ? (
                       <span className="inline-amt">
-                        <span>$</span>
+                        <span>{currencySymbol()}</span>
                         <input className="input" type="number" min={0} step={10} autoFocus aria-label={`${c} budget`} value={draft} onChange={(e) => setDraft(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") save(c); if (e.key === "Escape") setEditing(null); }} />
                         <button className="linkbtn" type="button" onClick={() => save(c)}>Save</button>
                       </span>
                     ) : (
-                      <button className="linkbtn num" type="button" onClick={() => { setEditing(c); setDraft(String(b)); }} aria-label={`Edit ${c} budget`}>{fmt(b)}</button>
+                      <button className="linkbtn num" type="button" onClick={() => { setEditing(c); setDraft(String(Math.round(fromUsd(b)))); }} aria-label={`Edit ${c} budget`}>{fmt(b)}</button>
                     )}
                   </span>
                 </div>

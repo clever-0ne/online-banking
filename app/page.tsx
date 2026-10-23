@@ -75,7 +75,7 @@ export default async function Landing() {
       {/* Masthead */}
       <header className="wf-mast">
         <div className="wf-wrap wf-mast-in">
-          <Link href="/" className="wf-brand" aria-label="Anchor Bank home"><LogoMark size={34} /><span>Anchor Bank</span></Link>
+          <Link href="/" className="wf-brand" translate="no" aria-label="Anchor Bank home"><LogoMark size={34} /><span>Anchor Bank</span></Link>
           <nav className="wf-nav" aria-label="Main">
             <a href="#accounts">Checking</a>
             <a href="#accounts">Savings</a>
@@ -266,7 +266,7 @@ export default async function Landing() {
       <footer className="wf-foot">
         <div className="wf-wrap wf-foot-grid">
           <div className="wf-foot-brand">
-            <Link href="/" className="wf-brand wf-brand-dark"><LogoMark size={30} /><span>Anchor Bank</span></Link>
+            <Link href="/" className="wf-brand wf-brand-dark" translate="no"><LogoMark size={30} /><span>Anchor Bank</span></Link>
             <p>Checking, savings and cards in one place.</p>
           </div>
           <div><b>Accounts</b><a href="#accounts">Checking</a><a href="#accounts">Savings</a><a href="#accounts">Credit cards</a></div>

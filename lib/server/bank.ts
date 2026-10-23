@@ -4,6 +4,7 @@
 // Anything that moves money runs in one transaction holding that customer's lock, so balances can't be double-spent.
 import { randomUUID } from "node:crypto";
 import { all, one, run, tx } from "./db";
+import { notifyCustomer } from "./push";
 import { addBusinessDays, addDays, addMonths, fmt, mask, nextDayOfMonth, todayISO } from "@/lib/format";
 import { ACH_DAILY_LIMIT, formatPhone, handleKind, P2P_DAILY_LIMIT } from "@/lib/logic";
 import { newAccount, ROUTING_NUMBER } from "@/lib/seed";
@@ -372,7 +373,13 @@ export async function payBill(user: Owner, body: Record<string, unknown>) {
 }
 
 async function schedule(user: Owner, m: Movement, repeat: Repeat) {
+  let toName = "";
+  let fromName = "";
   await withSettings(user, async (s) => {
+    fromName = (await accountRow(user.id, m.from)).name;
+    if (m.type === "ach") { const e = s.external.find((x) => x.id === m.to); toName = e ? `${e.bank} ${mask(e.last4)}` : ""; }
+    else if (m.type === "bill") toName = s.billers.find((x) => x.id === m.to)?.name ?? "";
+    else toName = (await accountRows(user.id)).find((x) => x.id === m.to)?.name ?? "";
     if (m.type !== "bill" && m.type !== "ach") await accountRow(user.id, m.to); // the destination must exist
     if (m.type === "ach" && !s.external.some((e) => e.id === m.to)) throw new BankError("Add that account before sending money to it.", 400, "to");
     if (m.type === "bill" && !s.billers.some((b) => b.id === m.to)) throw new BankError("Add that payee before paying them.", 400, "to");
@@ -383,6 +390,21 @@ async function schedule(user: Owner, m: Movement, repeat: Repeat) {
       await run("INSERT INTO scheduled_payments (id, user_id, type, from_acct, to_ref, amount_cents, date, repeat, memo, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         "sc_" + randomUUID(), user.id, m.type, m.from, m.to, m.amountCents, next, repeat, m.memo, new Date().toISOString());
     }
+  });
+  const now = m.date === todayISO();
+  const amount = fmt(m.amountCents / 100);
+  const what = m.type === "bill" ? "Bill payment" : m.type === "ach" ? "Transfer to another bank" : toName.includes("Visa") ? "Card payment" : "Transfer";
+  const repeats = repeat === "once" ? "" : ` It repeats ${repeat}.`;
+  await notifyCustomer(user.id, {
+    title: now ? `${what} ${m.type === "ach" ? "on its way" : "sent"}` : `${what} scheduled`,
+    body: now
+      ? `${amount} to ${toName} from your ${fromName}.${m.type === "ach" ? " It usually arrives in 1–3 business days." : ""}${repeats}`
+      : `${amount} to ${toName} will go out on ${m.date}.${repeats}`,
+    url: m.type === "bill" ? "/bills" : "/transfer", tag: "payment",
+    email: {
+      details: [["Amount", amount], ["To", toName], ["From", fromName], ["Date", m.date], ...(repeat !== "once" ? [["Repeats", repeat] as [string, string]] : []), ...(m.memo ? [["Memo", m.memo.slice(0, 60)] as [string, string]] : []), ["Status", now ? (m.type === "ach" ? "Processing" : "Sent") : "Scheduled"]],
+      button: { label: m.type === "bill" ? "View bill pay" : "View activity", href: m.type === "bill" ? "/bills" : "/activity" },
+    },
   });
 }
 
@@ -416,16 +438,30 @@ export async function sendMoney(user: Owner, body: Record<string, unknown>) {
       await writeSettings(user.id, { ...s, contacts: [...s.contacts, { id: "c_" + randomUUID().slice(0, 8), name, handle }] });
     }
   });
+  await notifyCustomer(user.id, {
+    title: "Money sent", body: `You sent ${fmt(cents / 100)} to ${name} (${handle}) from your checking.`, url: "/send", tag: "payment",
+    email: {
+      details: [["Amount", fmt(cents / 100)], ["To", name], ["Sent to", handle], ["From", "Checking"], ...(memo ? [["Note", memo.slice(0, 60)] as [string, string]] : []), ["Status", "Sent"]],
+      button: { label: "View activity", href: "/activity" },
+      note: "If you didn't send this, contact us right away.",
+    },
+  });
 }
 
 /** Moves money from checking to savings and counts it toward a goal. */
 export async function contributeToGoal(user: Owner, body: Record<string, unknown>) {
   const goalId = str(body.goalId, 60);
   const cents = amountCents(body.amount);
+  let goalName = "";
   await withSettings(user, async (s) => {
     const g = s.goals.find((x) => x.id === goalId);
     if (!g) throw new BankError("That goal doesn't exist.", 404);
+    goalName = g.name;
     await move(user.id, s, { type: "transfer", from: "chk", to: "sav", amountCents: cents, date: todayISO(), memo: `Goal: ${g.name}`, goalId }, "customer");
+  });
+  await notifyCustomer(user.id, {
+    title: "Added to your savings goal", body: `${fmt(cents / 100)} moved from checking to savings for "${goalName}".`, url: "/goals", tag: "payment",
+    email: { details: [["Amount", fmt(cents / 100)], ["Goal", goalName], ["From", "Checking"], ["To", "High-Yield Savings"]], button: { label: "See your goals", href: "/goals" } },
   });
 }
 

@@ -62,7 +62,7 @@ export default function DashboardPage() {
               {cash.map((a) => (
                 <li key={a.id}>
                   <Link href={can("/activity") ? "/activity" : "/dashboard"} className="acct-row">
-                    <span className="acct-name"><b>{a.name}</b><span className="muted">{mask(a.last4)}{a.apy ? ` · ${a.apy}% APY` : ""}{a.held ? ` · ${fmt(a.held)} on hold` : ""}</span></span>
+                    <span className="acct-name"><b translate="no">{a.name}</b><span className="muted">{mask(a.last4)}{a.apy ? ` · ${a.apy}% APY` : ""}{a.held ? ` · ${fmt(a.held)} on hold` : ""}</span></span>
                     <span className="acct-bal num">{fmt(available(state, a.id))}</span>
                   </Link>
                 </li>
@@ -77,7 +77,7 @@ export default function DashboardPage() {
             <ul className="acct-list">
               <li>
                 <Link href={can("/cards") ? "/cards" : "/dashboard"} className="acct-row">
-                  <span className="acct-name"><b>{cc.name}</b><span className="muted">{mask(cc.last4)} · {fmt(available(state, "cc"))} available of {fmt(cc.limit ?? 0)}</span></span>
+                  <span className="acct-name"><b translate="no">{cc.name}</b><span className="muted">{mask(cc.last4)} · {fmt(available(state, "cc"))} available of {fmt(cc.limit ?? 0)}</span></span>
                   <span className="acct-bal num">{fmt(owed)}</span>
                 </Link>
               </li>

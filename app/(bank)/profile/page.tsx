@@ -5,6 +5,8 @@ import { useRef, useState } from "react";
 import { Avatar } from "@/components/Avatar";
 import { InstallApp } from "@/components/InstallApp";
 import { Passkeys } from "@/components/Passkeys";
+import { currencyChoice, languageChoice, setCurrencyChoice, setLanguageChoice } from "@/components/visitorLocale";
+import { LANGUAGES } from "@/lib/locale";
 import { PushToggle } from "@/components/PushToggle";
 import { useBank } from "@/components/BankProvider";
 import { setThemeChoice, useTheme, type ThemeChoice } from "@/components/ThemeToggle";
@@ -298,10 +300,17 @@ export default function ProfilePage() {
             </div>
             <div className="tk-row">
               <RowIcon d={I.globe} />
-              <div className="tk-row-main"><b>Language</b><span>For emails, texts and statements</span></div>
-              <select className="input tk-select" aria-label="Language" value={p.prefs.language} onChange={(e) => setProfile((x) => ({ ...x, prefs: { ...x.prefs, language: e.target.value as "en" | "es" } }), "Language saved")}>
-                <option value="en">English</option>
-                <option value="es">Español</option>
+              <div className="tk-row-main"><b>Language</b><span>Automatic uses the language where you are</span></div>
+              <select className="input tk-select" aria-label="Language" translate="no" defaultValue={languageChoice()} onChange={(e) => { setLanguageChoice(e.target.value); location.reload(); }}>
+                {LANGUAGES.map(([code, label]) => <option key={code} value={code}>{label}</option>)}
+              </select>
+            </div>
+            <div className="tk-row">
+              <RowIcon d={I.globe} />
+              <div className="tk-row-main"><b>Currency</b><span>Your account is held in US dollars; local amounts use today&apos;s exchange rate</span></div>
+              <select className="input tk-select" aria-label="Currency" translate="no" defaultValue={currencyChoice()} onChange={(e) => { setCurrencyChoice(e.target.value); location.reload(); }}>
+                <option value="auto">Local currency</option>
+                <option value="USD">US dollar (USD)</option>
               </select>
             </div>
             <label className="tk-row">

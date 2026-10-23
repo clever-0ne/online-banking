@@ -7,7 +7,7 @@ import { ICONS } from "@/components/nav";
 import { AmountInput, PageHead, Tabs } from "@/components/ui";
 import { copyText, useFunding } from "@/components/useFunding";
 import { ASSETS, assetInfo, MIN_DEPOSIT, RAMP_URL, type Asset } from "@/lib/funding";
-import { fmt, mask } from "@/lib/format";
+import { fmt, mask, parseAmount } from "@/lib/format";
 
 export default function DepositPage() {
   const { state, act, toast } = useBank();
@@ -43,7 +43,7 @@ export default function DepositPage() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    const v = Number(amount);
+    const v = parseAmount(amount);
     if (!amount || !Number.isFinite(v) || v <= 0) { setError("Enter the amount you sent, in dollars."); return; }
     if (v < MIN_DEPOSIT) { setError(`The minimum deposit is ${fmt(MIN_DEPOSIT)}.`); return; }
     setBusy(true); setError("");
@@ -113,7 +113,7 @@ export default function DepositPage() {
           <form className="form" onSubmit={submit} noValidate>
             <div className="row-2">
               <div className="field">
-                <label htmlFor="dp-amount">Amount sent (US dollars)</label>
+                <label htmlFor="dp-amount">Amount sent</label>
                 <AmountInput id="dp-amount" value={amount} onChange={setAmount} />
               </div>
               <div className="field">

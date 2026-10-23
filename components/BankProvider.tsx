@@ -5,6 +5,8 @@ import type { BankState } from "@/lib/types";
 import { Splash } from "./Splash";
 import { pageOf } from "@/lib/pages";
 import { disablePush } from "./pwa";
+import { currencyChoice, visitorLocale } from "./visitorLocale";
+import { setDisplayCurrency } from "@/lib/format";
 
 const SAVE_DELAY_MS = 500;
 const MIN_SPLASH_MS = 900;
@@ -74,9 +76,12 @@ export function BankProvider({ user, blocked: initialBlocked, children }: { user
   useEffect(() => {
     let cancelled = false;
     const t = setTimeout(() => setReady(true), MIN_SPLASH_MS);
-    load()
-      .then((s) => {
+    // Amounts are shown in the visitor's local currency (or US dollars if they chose that in Profile).
+    Promise.all([load(), visitorLocale().catch(() => null)])
+      .then(([s, loc]) => {
         if (cancelled) return;
+        if (loc && currencyChoice() !== "USD") setDisplayCurrency(loc.currency, loc.rate, navigator.language);
+        else setDisplayCurrency("USD", 1);
         if (!s) { window.location.href = "/login"; return; }
         fromServer.current = s;
         setState(s);

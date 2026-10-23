@@ -7,7 +7,7 @@ import { Avatar } from "@/components/Avatar";
 import { useBank } from "@/components/BankProvider";
 import { ICONS } from "@/components/nav";
 import { Tabs } from "@/components/ui";
-import { fmt, shortDate } from "@/lib/format";
+import { fmt, shortDate, toUsd } from "@/lib/format";
 import { available, formatPhone, handleKind, P2P_DAILY_LIMIT, requestMoney, sentToday } from "@/lib/logic";
 
 type Mode = "send" | "request";
@@ -42,7 +42,7 @@ export default function SendPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const value = Number(cents || "0") / 100;
+  const value = toUsd(Number(cents || "0") / 100);
   const avail = available(state, "chk");
   const remaining = P2P_DAILY_LIMIT - sentToday(state);
 
