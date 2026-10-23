@@ -22,6 +22,9 @@ Open http://localhost:3000 and open an account at `/signup`. New accounts start 
 | `ADMIN_PASSWORD` | The staff password. Staff sign in with this alone (no username). Use a long, unique one in production. |
 | `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` | Push notification keys. Generate a pair with `npx web-push generate-vapid-keys`. Changing them turns off notifications on every device until people turn them back on. |
 | `VAPID_SUBJECT` | A contact address for push services: `mailto:you@yourbank.com` or your site's `https://` address. |
+| `RESEND_API_KEY` | Resend API key for email. Without it, no emails are sent and "Forgot password" is unavailable. |
+| `EMAIL_FROM` | The sender, on a domain verified in Resend, e.g. `Anchor Bank <no-reply@yourbank.com>`. |
+| `STAFF_EMAIL` | Optional. Staff inbox for new deposits and withdrawals to review. |
 | `AUTH_SECRET` | 32+ random characters used to sign session cookies. If unset, a random key is created in `.data/secret`. |
 
 Changing `ADMIN_PASSWORD` signs out every staff session.
@@ -79,6 +82,16 @@ Customers turn them on per device in Profile → Preferences → **Notifications
 Staff turn them on under Deposits & withdrawals → **Notify me on this device**, and hear about every new deposit and withdrawal to review. Notification text never includes customer names or full addresses.
 
 On iPhone, notifications work once Anchor Bank is added to the Home Screen and opened from there (iOS 16.4 or later).
+
+## Email
+
+Sent through Resend from `EMAIL_FROM`, in one Anchor-branded layout (`lib/server/email.ts`). Customers get:
+
+- a welcome email when they open an account
+- every alert they'd get as a push notification: new sign-ins (if Sign-in alerts is on), password and passkey changes, and deposits and withdrawals received, approved or declined, with the amount and status
+- password reset links (`/forgot-password`): one-time, valid for 30 minutes, only a hash is stored, and the reply is the same whether or not the email has an account
+
+Buttons in alert emails link to `APP_ORIGIN`, so set it on your host. With `STAFF_EMAIL` set, staff also get an email for each new deposit and withdrawal.
 
 ## Install as an app
 

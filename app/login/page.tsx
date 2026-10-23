@@ -97,6 +97,7 @@ export default function LoginPage() {
           <input className="input" id="li-email" type="email" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} />
         </div>
         <PasswordField id="li-pw" label="Password" value={password} onChange={setPassword} autoComplete="current-password" show={show} onToggle={() => setShow((s) => !s)} />
+        <Link className="forgot-link" href={`/forgot-password${email.trim() ? `?email=${encodeURIComponent(email.trim())}` : ""}`}>Forgot password?</Link>
         <label className="check-row"><input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />Keep me signed in for 30 days</label>
         {error && <p className="hint bad" role="alert">{error}</p>}
         <button className="btn wide" type="submit" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</button>

@@ -833,3 +833,8 @@ label.tk-row { cursor: pointer; }
 @keyframes reminder-in { from { opacity: 0; transform: translateY(18px) scale(.98); } to { opacity: 1; transform: none; } }
 @media (max-width: 760px) { .reminder { left: 16px; right: 16px; width: auto; bottom: calc(var(--tabbar-h, 76px) + 24px + env(safe-area-inset-bottom, 0px)); } }
 @media (prefers-reduced-motion: reduce) { .reminder { animation: none; } }
+
+/* ---------- Forgot password ---------- */
+.forgot-link { justify-self: end; margin-top: -6px; font-size: 0.84rem; font-weight: 600; color: var(--accent); text-decoration: none; }
+.forgot-link:hover { text-decoration: underline; }
+.link-inline { border: 0; padding: 0; background: none; font: inherit; color: var(--accent); font-weight: 600; cursor: pointer; text-decoration: underline; }

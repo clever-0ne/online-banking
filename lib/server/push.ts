@@ -2,6 +2,7 @@
 // account; staff devices get notified about new deposit and withdrawal requests. Server only.
 import webpush from "web-push";
 import { all, one, run } from "./db";
+import { sendEmail, type EmailMessage } from "./email";
 
 export interface PushMessage {
   title: string;
@@ -10,7 +11,17 @@ export interface PushMessage {
   url?: string;
   /** Notifications with the same tag replace each other instead of stacking. */
   tag?: string;
+  /** The matching email. By default it repeats the title and body with a button to url; false sends no email. */
+  email?: Partial<Omit<EmailMessage, "to">> | false;
 }
+
+const emailFor = (to: string, msg: PushMessage): EmailMessage => ({
+  to,
+  subject: msg.title,
+  paragraphs: [msg.body],
+  button: msg.url ? { label: "Open Anchor Bank", href: msg.url } : undefined,
+  ...(msg.email || {}),
+});
 
 let configured: boolean | null = null;
 /** Why notifications are off on this server, or null when they are set up. Shown in the staff setup check. */
@@ -100,18 +111,22 @@ async function deliver(subs: Sub[], msg: PushMessage) {
   }));
 }
 
-/** Notifies every device a customer turned notifications on for. Never throws. */
+/** Notifies a customer on every device they turned notifications on for, and by email. Never throws. */
 export async function notifyCustomer(userId: string, msg: PushMessage) {
-  try {
-    await deliver(await all<Sub>("SELECT endpoint, p256dh, auth FROM push_subscriptions WHERE user_id = ?", userId), msg);
-  } catch {}
+  const push = async () => deliver(await all<Sub>("SELECT endpoint, p256dh, auth FROM push_subscriptions WHERE user_id = ?", userId), msg);
+  const mail = async () => {
+    if (msg.email === false) return;
+    const u = await one<{ email: string; status: string }>("SELECT email, status FROM users WHERE id = ?", userId);
+    if (u) await sendEmail(emailFor(u.email, msg));
+  };
+  await Promise.allSettled([push(), mail()]);
 }
 
-/** Notifies every staff device. Never throws. */
+/** Notifies every staff device, and STAFF_EMAIL if it's set. Never throws. */
 export async function notifyStaff(msg: PushMessage) {
-  try {
-    await deliver(await all<Sub>("SELECT endpoint, p256dh, auth FROM push_subscriptions WHERE audience = 'staff'"), msg);
-  } catch {}
+  const push = async () => deliver(await all<Sub>("SELECT endpoint, p256dh, auth FROM push_subscriptions WHERE audience = 'staff'"), msg);
+  const to = process.env.STAFF_EMAIL?.trim();
+  await Promise.allSettled([push(), to && msg.email !== false ? sendEmail(emailFor(to, { ...msg, email: { button: msg.url ? { label: "Review it", href: msg.url } : undefined, ...(msg.email || {}) } })) : null]);
 }
 
 /** Sends to one device, e.g. to confirm notifications work right after they're turned on. */

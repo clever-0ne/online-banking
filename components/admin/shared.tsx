@@ -18,6 +18,8 @@ export const ACTION_LABELS: Record<string, string> = {
   reset_bank_data: "Reset banking data",
   delete_user: "Deleted user",
   password_changed: "Changed password",
+  password_reset_requested: "Asked for a password reset email",
+  password_reset: "Reset password by email",
   deposit_requested: "Reported a deposit",
   deposit_approved: "Approved a deposit",
   deposit_declined: "Declined a deposit",

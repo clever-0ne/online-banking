@@ -41,6 +41,8 @@ export async function setDepositAddress(actor: Actor, asset: unknown, address: u
 }
 
 // ---------- Requests ----------
+const acctName = (a: "chk" | "sav") => (a === "sav" ? "Savings" : "Checking");
+const shortAddr = (addr: string) => (addr.length > 18 ? `${addr.slice(0, 8)}…${addr.slice(-6)}` : addr);
 type DepositRow = { id: string; user_id: string; asset: Asset; address: string; tx_hash: string; amount_cents: number; status: "pending" | "approved" | "rejected"; to_acct: "chk" | "sav"; created_at: string; reviewed_at: string | null; reviewed_by: string | null };
 type WithdrawalRow = { id: string; user_id: string; asset: Asset; address: string; amount_cents: number; status: "pending" | "sent" | "failed"; tx_ref: string | null; from_acct: "chk" | "sav"; created_at: string; reviewed_at: string | null; reviewed_by: string | null };
 
@@ -90,6 +92,10 @@ export async function requestDeposit(user: Owner, body: Record<string, unknown>)
     "dep_" + randomUUID(), user.id, asset, addr.address, ref, amount, acctOf(body.to), new Date().toISOString(),
   );
   await audit(user, "deposit_requested", user, `${fmt(amount / 100)} in ${asset}`);
+  await notifyCustomer(user.id, {
+    title: "We received your deposit", body: `Your ${fmt(amount / 100)} ${asset} deposit is waiting for approval. We'll let you know as soon as it's in your account.`, url: "/deposit", tag: "funding",
+    email: { details: [["Amount", fmt(amount / 100)], ["Asset", asset], ["Account", acctName(acctOf(body.to))], ["Status", "Pending approval"], ...(ref ? [["Transaction ID", ref.slice(0, 40)] as [string, string]] : [])], button: { label: "View your deposits", href: "/deposit" } },
+  });
   await notifyStaff({ title: "New deposit to review", body: `${fmt(amount / 100)} in ${asset}`, url: `${adminPath() ?? ""}/funding`, tag: "queue" });
 }
 
@@ -112,6 +118,10 @@ export async function requestWithdrawal(user: Owner, body: Record<string, unknow
     );
   }, user.id);
   await audit(user, "withdrawal_requested", user, `${fmt(amount / 100)} in ${asset}`);
+  await notifyCustomer(user.id, {
+    title: "We received your withdrawal request", body: `${fmt(amount / 100)} is on hold from your ${acctName(from).toLowerCase()} while we review your ${asset} withdrawal. If it's declined, the hold is released.`, url: "/withdraw", tag: "funding",
+    email: { details: [["Amount", fmt(amount / 100)], ["Asset", asset], ["To wallet", shortAddr(address)], ["From", acctName(from)], ["Status", "Pending approval"]], button: { label: "View your withdrawals", href: "/withdraw" } },
+  });
   await notifyStaff({ title: "New withdrawal to review", body: `${fmt(amount / 100)} in ${asset}`, url: `${adminPath() ?? ""}/funding`, tag: "queue" });
 }
 
@@ -149,8 +159,10 @@ export async function review(actor: Actor, type: "deposit" | "withdrawal", id: s
     }, d.user_id);
     await audit(actor, decision === "approve" ? "deposit_approved" : "deposit_declined", { id: d.user_id, email: d.email }, `${fmt(d.amount_cents / 100)} in ${d.asset}`);
     await notifyCustomer(d.user_id, decision === "approve"
-      ? { title: "Deposit approved", body: `${fmt(d.amount_cents / 100)} from your ${d.asset} deposit is now in your ${d.to_acct === "sav" ? "savings" : "checking"}.`, url: "/deposit", tag: "funding" }
-      : { title: "Deposit declined", body: `Your ${fmt(d.amount_cents / 100)} ${d.asset} deposit couldn't be confirmed. Contact us if you have questions.`, url: "/deposit", tag: "funding" });
+      ? { title: "Deposit approved", body: `${fmt(d.amount_cents / 100)} from your ${d.asset} deposit is now in your ${d.to_acct === "sav" ? "savings" : "checking"}.`, url: "/deposit", tag: "funding",
+          email: { details: [["Amount", fmt(d.amount_cents / 100)], ["Asset", d.asset], ["Added to", acctName(d.to_acct)], ["Status", "Approved"]], button: { label: "See your balance", href: "/dashboard" } } }
+      : { title: "Deposit declined", body: `Your ${fmt(d.amount_cents / 100)} ${d.asset} deposit couldn't be confirmed. Contact us if you have questions.`, url: "/deposit", tag: "funding",
+          email: { details: [["Amount", fmt(d.amount_cents / 100)], ["Asset", d.asset], ["Status", "Declined"]] } });
     return;
   }
   const w = await one<WithdrawalRow & { email: string }>("SELECT w.*, u.email FROM crypto_withdrawals w JOIN users u ON u.id = w.user_id WHERE w.id = ?", id);
@@ -165,7 +177,9 @@ export async function review(actor: Actor, type: "deposit" | "withdrawal", id: s
   }, w.user_id);
   await audit(actor, decision === "approve" ? "withdrawal_approved" : "withdrawal_declined", { id: w.user_id, email: w.email }, `${fmt(w.amount_cents / 100)} in ${w.asset}`);
   await notifyCustomer(w.user_id, decision === "approve"
-    ? { title: "Withdrawal sent", body: `${fmt(w.amount_cents / 100)} in ${w.asset} is on its way to your wallet.`, url: "/withdraw", tag: "funding" }
-    : { title: "Withdrawal declined", body: `Your ${fmt(w.amount_cents / 100)} ${w.asset} withdrawal was declined and the money is available again.`, url: "/withdraw", tag: "funding" });
+    ? { title: "Withdrawal sent", body: `${fmt(w.amount_cents / 100)} in ${w.asset} is on its way to your wallet.`, url: "/withdraw", tag: "funding",
+        email: { details: [["Amount", fmt(w.amount_cents / 100)], ["Asset", w.asset], ["To wallet", shortAddr(w.address)], ...(reference.trim() ? [["Transaction ID", reference.trim().slice(0, 40)] as [string, string]] : []), ["Status", "Sent"]] } }
+    : { title: "Withdrawal declined", body: `Your ${fmt(w.amount_cents / 100)} ${w.asset} withdrawal was declined and the money is available again.`, url: "/withdraw", tag: "funding",
+        email: { details: [["Amount", fmt(w.amount_cents / 100)], ["Asset", w.asset], ["Status", "Declined · hold released"]] } });
 }
 
