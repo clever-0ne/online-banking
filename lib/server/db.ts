@@ -190,6 +190,14 @@ CREATE TABLE IF NOT EXISTS password_resets (
   used_at    TEXT
 );
 CREATE INDEX IF NOT EXISTS password_resets_user ON password_resets (user_id);
+
+-- Six-digit sign-in codes sent by email, the alternative to a passkey. One per customer; only a keyed hash is stored.
+CREATE TABLE IF NOT EXISTS sign_in_codes (
+  user_id    TEXT PRIMARY KEY REFERENCES users (id) ON DELETE CASCADE,
+  code_hash  TEXT NOT NULL,
+  expires_at TEXT NOT NULL,
+  tries      INTEGER NOT NULL DEFAULT 0
+);
 `;
 
 function makePool(): Pool {

@@ -30,8 +30,8 @@ function relyingParty(req: NextRequest) {
 const CHALLENGE_COOKIE = "kb_pk_challenge";
 export const PENDING_COOKIE = "kb_2fa";
 
-function seal(payload: object): string {
-  const body = Buffer.from(JSON.stringify({ ...payload, exp: Date.now() + STEP_MS })).toString("base64url");
+function seal(payload: object, ms = STEP_MS): string {
+  const body = Buffer.from(JSON.stringify({ ...payload, exp: Date.now() + ms })).toString("base64url");
   return `${body}.${sign(body)}`;
 }
 
@@ -49,8 +49,8 @@ function unseal<T>(token: string | undefined): T | null {
   }
 }
 
-function setStepCookie(res: NextResponse, name: string, value: string) {
-  res.cookies.set(name, value, { httpOnly: true, sameSite: "strict", secure: process.env.NODE_ENV === "production", path: "/", maxAge: STEP_MS / 1000 });
+function setStepCookie(res: NextResponse, name: string, value: string, ms = STEP_MS) {
+  res.cookies.set(name, value, { httpOnly: true, sameSite: "strict", secure: process.env.NODE_ENV === "production", path: "/", maxAge: ms / 1000 });
 }
 export function clearStepCookies(res: NextResponse) {
   for (const name of [CHALLENGE_COOKIE, PENDING_COOKIE]) res.cookies.set(name, "", { httpOnly: true, sameSite: "strict", path: "/", maxAge: 0 });
@@ -66,8 +66,9 @@ const readChallenge = (req: NextRequest, purpose: Challenge["purpose"], uid: str
 // ---------- Half-finished sign-in (password checked, passkey still needed) ----------
 export type Pending = { uid: string; v: number; remember: boolean };
 
-export function startPendingSignIn(res: NextResponse, p: Pending) {
-  setStepCookie(res, PENDING_COOKIE, seal(p));
+/** `ms` lets the email-code step wait longer than a passkey prompt, since email can take a minute to arrive. */
+export function startPendingSignIn(res: NextResponse, p: Pending, ms = STEP_MS) {
+  setStepCookie(res, PENDING_COOKIE, seal(p, ms), ms);
 }
 export const readPending = (req: NextRequest) => unseal<Pending>(req.cookies.get(PENDING_COOKIE)?.value);
 

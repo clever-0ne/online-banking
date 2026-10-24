@@ -1315,3 +1315,8 @@ h2 { font-weight: 600; font-size: 1.2rem; }
   .story:not(.lead) .story-body { padding: 10px 12px; }
   .story:not(.lead) b { font-size: .95rem; }
 }
+
+/* Sign-in by email code */
+.code-input { font-size: 1.5rem; letter-spacing: .4em; text-align: center; font-variant-numeric: tabular-nums; }
+.link-btn { font: inherit; background: none; border: 0; padding: 6px; color: var(--tint-2); font-weight: 600; cursor: pointer; justify-self: center; }
+.link-btn:hover { text-decoration: underline; }
