@@ -1471,3 +1471,46 @@ html:has(.app), html:has(.so), html:has(.auth) { background: var(--warm-top) !im
 .summary-side .panel { margin: 0; }
 .act-card { margin: 0; }
 .summary-main > .sec-row { margin-top: 8px; }
+
+/* =====================================================================================================
+   A calmer palette: one brand colour (indigo) for links, buttons, icons and the active tab; warm neutrals
+   for everything else. Green marks money coming in, red only for warnings and money owed past due.
+   Headings and amounts are near-black.
+   ===================================================================================================== */
+:root { --tint: var(--accent); --tint-2: var(--accent); --text: #4F4A47; --icon-bg: #EEECF8; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --text: #C9C7CF; --icon-bg: #24223A; } }
+:root[data-theme="dark"] { --text: #C9C7CF; --icon-bg: #24223A; }
+
+/* Headings, titles and labels: near-black, not coloured. */
+.head h1, .dash-title h1, .sec-title, .side-title, .panel h2, .panel h3, .greet-band h1, .mk-name, .act-card .side-title { color: var(--head) !important; }
+.acct-label, .label, .eyebrow { color: var(--head); }
+th, .summary-tx th { color: var(--muted) !important; }
+.sec-title::before { background: var(--accent) !important; }
+
+/* Amounts: balances and money out in near-black; money in stays green. */
+.neg, .num.neg, .tx-amt.neg, .mk-list .neg { color: var(--head) !important; }
+.acct-amount.owed { color: var(--head) !important; }
+
+/* Icons: one style everywhere, the brand colour on a pale tint (no rainbow). */
+.act-ico, .feat-ico { background: var(--icon-bg) !important; color: var(--accent) !important; box-shadow: none !important; }
+.act-item { color: var(--head); font-weight: 500; }
+.feat-card::after { background: var(--accent) !important; opacity: .05 !important; }
+.feat-go { color: var(--accent) !important; }
+.quick-ico, .row-ico { background: var(--icon-bg); color: var(--accent); }
+
+/* Explore: neutral coin badges, no coloured top borders, plain placeholders. */
+.mk-tile { border-top: 0 !important; }
+.mk-badge { background: var(--surface-2) !important; color: var(--head) !important; box-shadow: inset 0 0 0 1px var(--line) !important; }
+.story-src { color: var(--muted) !important; }
+.story-img, .story-ph { background: var(--surface-3) !important; }
+.story-ph { color: var(--muted) !important; font-weight: 600 !important; }
+.ex-hero { background: radial-gradient(420px 260px at 92% 0%, rgb(255 255 255 / .1), transparent 70%), linear-gradient(125deg, #241D86 0%, #3A30B0 60%, #4B3FD1 100%) !important; }
+.ex-eyebrow { color: rgb(255 255 255 / .75) !important; }
+
+/* Sign on: promo icons in the brand tint instead of yellow. */
+.so-promo-ico { background: var(--icon-bg) !important; color: var(--accent) !important; }
+
+/* Card strip: neutral, not lavender. */
+:root { --strip: #F4F1EE; }
+:root[data-theme="dark"] { --strip: #1F1E28; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --strip: #1F1E28; } }
