@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { startAuthentication } from "@simplewebauthn/browser";
-import { AuthShell, PasswordField } from "@/components/AuthShell";
+import { AuthShell } from "@/components/AuthShell";
+import { LogoMark } from "@/components/Logo";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { ICONS } from "@/components/nav";
 
 /** Only allow redirects back into this site. */
@@ -31,6 +33,7 @@ export default function LoginPage() {
   const [code, setCode] = useState("");
   const [sentTo, setSentTo] = useState("");
   const [note, setNote] = useState("");
+  const [greeting, setGreeting] = useState("Welcome");
 
   // Coming from the sign-on box on the home page: keep what was entered there.
   useEffect(() => {
@@ -38,6 +41,8 @@ export default function LoginPage() {
     const e = q.get("email");
     if (e) { setEmail(e); document.getElementById("li-pw")?.focus(); }
     if (q.get("remember") === "1") setRemember(true);
+    const h = new Date().getHours();
+    setGreeting(h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening");
   }, []);
 
   async function usePasskey() {
@@ -85,6 +90,24 @@ export default function LoginPage() {
       const e = err as Error & { status?: number };
       if (e.status === 401 && /timed out/.test(e.message)) { setStep("password"); setPassword(""); }
       setError(e.message); setBusy(false);
+    }
+  }
+
+  // "Sign on with a passkey": no email or password, the passkey alone says who it is.
+  async function passkeyOnly() {
+    setBusy(true); setError("");
+    try {
+      const { options } = await call("/api/auth/passkey/direct", { cache: "no-store" });
+      const response = await startAuthentication({ optionsJSON: options });
+      await call("/api/auth/passkey/direct", json({ response, remember }));
+      window.location.href = nextPath();
+    } catch (err) {
+      const e = err as Error;
+      setError(
+        e.name === "NotAllowedError" || e.name === "AbortError" ? "The passkey request was canceled or timed out. Try again, or sign on with your email and password." :
+        e.name === "SecurityError" ? "Passkeys can't be used on this web address. Open Anchor Bank at its main address and try again." :
+        e.message);
+      setBusy(false);
     }
   }
 
@@ -144,22 +167,52 @@ export default function LoginPage() {
   }
 
   return (
-    <AuthShell
-      title="Welcome back"
-      sub="Sign in to see your accounts."
-      aside={<p className="auth-switch">New to Anchor? <Link href="/signup">Open an account</Link></p>}
-    >
-      <form className="form auth-form" onSubmit={submit} noValidate>
-        <div className="field">
-          <label htmlFor="li-email">Email</label>
-          <input className="input" id="li-email" type="email" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} />
+    <div className="so">
+      <header className="so-top">
+        <Link href="/" className="so-brand" translate="no" aria-label="Anchor Bank home"><LogoMark size={30} /><span>ANCHOR BANK</span></Link>
+        <ThemeToggle />
+      </header>
+      <h1 className="so-greet">{greeting}</h1>
+      <main className="so-main">
+        <form className="so-card" onSubmit={submit} noValidate>
+          <label className="so-field">
+            <span className="sr-only">Email</span>
+            <input id="li-email" type="email" autoComplete="username webauthn" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          </label>
+          <label className="so-field">
+            <span className="sr-only">Password</span>
+            <input id="li-pw" type={show ? "text" : "password"} autoComplete="current-password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
+            <button type="button" className="so-show" onClick={() => setShow((v) => !v)} aria-pressed={show}>{show ? "Hide" : "Show"}</button>
+          </label>
+          <div className="so-checks">
+            <label><input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />Keep me signed in</label>
+          </div>
+          {error && <p className="hint bad" role="alert">{error}</p>}
+          <div className="so-btns">
+            <Link href="/signup" className="so-btn ghost">Enroll</Link>
+            <button type="submit" className="so-btn" disabled={busy || !email.trim() || !password}>
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M7 10V7a5 5 0 0 1 10 0v3h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1zm2 0h6V7a3 3 0 0 0-6 0z" /></svg>
+              {busy ? "Signing on…" : "Sign On"}
+            </button>
+          </div>
+          <div className="so-links">
+            <button type="button" onClick={passkeyOnly} disabled={busy}>→ Sign on with a passkey</button>
+            <Link href={`/forgot-password${email.trim() ? `?email=${encodeURIComponent(email.trim())}` : ""}`}>→ Forgot password?</Link>
+          </div>
+        </form>
+        <div className="so-promos">
+          <Link href="/#accounts" className="so-promo">
+            <span className="so-promo-ico">{ICONS.compass}</span>
+            <b>Explore our accounts</b>
+            <span>Find your fit ›</span>
+          </Link>
+          <Link href="/signup" className="so-promo">
+            <span className="so-promo-ico">{ICONS.card}</span>
+            <b>Earn 3.75% APY on savings</b>
+            <span>Learn more ›</span>
+          </Link>
         </div>
-        <PasswordField id="li-pw" label="Password" value={password} onChange={setPassword} autoComplete="current-password" show={show} onToggle={() => setShow((s) => !s)} />
-        <Link className="forgot-link" href={`/forgot-password${email.trim() ? `?email=${encodeURIComponent(email.trim())}` : ""}`}>Forgot password?</Link>
-        <label className="check-row"><input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />Keep me signed in for 30 days</label>
-        {error && <p className="hint bad" role="alert">{error}</p>}
-        <button className="btn wide" type="submit" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</button>
-      </form>
-    </AuthShell>
+      </main>
+    </div>
   );
 }

@@ -147,6 +147,38 @@ export async function signInOptions(req: NextRequest, res: NextResponse, userId:
   return options;
 }
 
+// ---------- Signing in with only a passkey (no email or password first) ----------
+const ANYONE = "*";
+
+/** A challenge any of this site's passkeys can answer; the browser lets the customer pick theirs. */
+export async function directSignInOptions(req: NextRequest, res: NextResponse) {
+  const { rpID } = relyingParty(req);
+  const options = await generateAuthenticationOptions({ rpID, allowCredentials: [], userVerification: "required" });
+  setStepCookie(res, CHALLENGE_COOKIE, seal({ purpose: "sign_in", uid: ANYONE, challenge: options.challenge } satisfies Challenge));
+  return options;
+}
+
+/** The customer whose passkey answered the challenge, or null. */
+export async function finishDirectSignIn(req: NextRequest, response: AuthenticationResponseJSON): Promise<string | null> {
+  if (typeof response?.id !== "string") return null;
+  const r = await one<Row & { user_id: string }>("SELECT * FROM passkeys WHERE credential_id = ?", response.id);
+  if (!r) return null;
+  const expectedChallenge = readChallenge(req, "sign_in", ANYONE);
+  if (!expectedChallenge) return null;
+  const { origin, rpID } = relyingParty(req);
+  try {
+    const v = await verifyAuthenticationResponse({
+      response, expectedChallenge, expectedOrigin: origin, expectedRPID: rpID, requireUserVerification: true,
+      credential: { id: r.credential_id, publicKey: isoBase64URL.toBuffer(r.public_key), counter: r.counter, transports: transportsOf(r) },
+    });
+    if (!v.verified) return null;
+    await run("UPDATE passkeys SET counter = ?, last_used_at = ? WHERE id = ?", v.authenticationInfo.newCounter, new Date().toISOString(), r.id);
+    return r.user_id;
+  } catch {
+    return null;
+  }
+}
+
 /** True when the response proves this customer holds one of their passkeys. Updates its counter and last use. */
 export async function finishSignIn(req: NextRequest, userId: string, response: AuthenticationResponseJSON): Promise<boolean> {
   const expectedChallenge = readChallenge(req, "sign_in", userId);

@@ -30,13 +30,13 @@ export default function DashboardPage() {
   const go = (href: string) => (can(href) ? href : "/dashboard");
 
   const actions = [
-    ["/transfer", "Transfer", ICONS.transfer],
-    ["/send", "Send money", ICONS.send],
-    ["/bills", "Pay bills", ICONS.bill],
-    ["/deposit", "Deposit", ICONS.topup],
-    ["/withdraw", "Withdraw", ICONS.request],
-    ["/statements", "Statements", ICONS.note],
-  ].filter(([href]) => can(href as string)) as [string, string, React.ReactNode][];
+    ["/transfer", "Transfer", ICONS.transfer, "violet"],
+    ["/send", "Send money", ICONS.send, "blue"],
+    ["/bills", "Pay bills", ICONS.bill, "amber"],
+    ["/deposit", "Deposit", ICONS.topup, "green"],
+    ["/withdraw", "Withdraw", ICONS.request, "pink"],
+    ["/statements", "Statements", ICONS.note, "teal"],
+  ].filter(([href]) => can(href as string)) as [string, string, React.ReactNode, string][];
 
   return (
     <div className="summary">
@@ -70,7 +70,11 @@ export default function DashboardPage() {
               <span className="acct-label" translate="no">{cc.name.toUpperCase()} {mask(cc.last4)}</span>
               <span className={`acct-amount num${owed > 0 ? " owed" : ""}`}>{fmt(owed)}</span>
               <span className="acct-cap">Current balance · {fmt(available(state, "cc"))} available credit</span>
-              <span className="acct-due">{owed > 0 && cc.dueDate ? <>Minimum {fmt(cc.minDue ?? 0)} due {longDate(cc.dueDate)}</> : "No payment due"}</span>
+              <span className="acct-strip">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" /></svg>
+                <span>{owed > 0 && cc.dueDate ? <><b className="num">{fmt(cc.minDue ?? 0)}</b> minimum due {longDate(cc.dueDate)}</> : <><b className="num">{fmt(available(state, "cc"))}</b> available to spend</>}</span>
+                <span className="acct-chev" aria-hidden="true">›</span>
+              </span>
             </Link>
           </div>
 
@@ -83,11 +87,16 @@ export default function DashboardPage() {
             </Link>
           )}
 
-          <div className="quick-tiles">
-            {actions.map(([href, label, icon]) => (
-              <Link key={href} href={href} className="quick-tile"><span className="quick-ico">{icon}</span><span>{label}</span></Link>
-            ))}
-          </div>
+          {actions.length > 0 && (
+            <section className="act-card">
+              <div className="side-head"><h2 className="side-title">Move money</h2>{can("/explore") && <Link className="more-link" href="/explore">Explore all</Link>}</div>
+              <div className="act-grid">
+                {actions.map(([href, label, icon, tone]) => (
+                  <Link key={href} href={href} className={`act-item tone-${tone}`}><span className="act-ico">{icon}</span><span>{label}</span></Link>
+                ))}
+              </div>
+            </section>
+          )}
 
           <div className="sec-row">
             <h2 className="sec-title">Recent activity</h2>
