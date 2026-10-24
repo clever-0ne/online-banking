@@ -1458,3 +1458,16 @@ html:has(.app), html:has(.so), html:has(.auth) { background: var(--warm-top) !im
 .auth { background: none; }
 .auth-top .icon-btn { color: var(--head); }
 .auth-top .icon-btn:hover { background: rgb(0 0 0 / .05); }
+
+/* Desktop dashboard alignment: the account tiles and the side cards start on the same line, every gap is
+   20px, the three account tiles share one height, and the card tile's strip sits on the tile's bottom edge. */
+.summary-main > .sec-title:first-child { display: none; }
+.summary-grid, .summary-main, .summary-side, .acct-tiles { gap: 20px; }
+.acct-tiles { grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); align-items: stretch; }
+.acct-tile { display: flex; flex-direction: column; gap: 4px; min-height: 168px; box-sizing: border-box; }
+.acct-tile:has(.acct-strip) .acct-cap { margin-bottom: 14px; }
+.acct-strip { margin-top: auto; }
+.acct-strip > span:nth-child(2) { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.summary-side .panel { margin: 0; }
+.act-card { margin: 0; }
+.summary-main > .sec-row { margin-top: 8px; }

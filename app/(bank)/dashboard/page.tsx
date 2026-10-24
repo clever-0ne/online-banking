@@ -72,7 +72,7 @@ export default function DashboardPage() {
               <span className="acct-cap">Current balance · {fmt(available(state, "cc"))} available credit</span>
               <span className="acct-strip">
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" /></svg>
-                <span>{owed > 0 && cc.dueDate ? <><b className="num">{fmt(cc.minDue ?? 0)}</b> minimum due {longDate(cc.dueDate)}</> : <><b className="num">{fmt(available(state, "cc"))}</b> available to spend</>}</span>
+                <span>{owed > 0 && cc.dueDate ? <><b className="num">{fmt(cc.minDue ?? 0)}</b> due {fromISO(cc.dueDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</> : <><b className="num">{fmt(available(state, "cc"))}</b> available to spend</>}</span>
                 <span className="acct-chev" aria-hidden="true">›</span>
               </span>
             </Link>
