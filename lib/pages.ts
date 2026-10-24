@@ -10,6 +10,7 @@ export const PAGES = [
   { slug: "bills", label: "Bill pay", group: "Pay & transfer" },
   { slug: "deposit", label: "Deposit", group: "Pay & transfer" },
   { slug: "withdraw", label: "Withdraw", group: "Pay & transfer" },
+  { slug: "explore", label: "Explore", group: "Plan & track" },
   { slug: "budget", label: "Budget", group: "Plan & track" },
   { slug: "goals", label: "Savings goals", group: "Plan & track" },
   { slug: "credit", label: "Credit score", group: "Plan & track" },

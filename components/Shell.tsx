@@ -31,7 +31,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
     { href: "/dashboard", label: "Accounts", icon: ICONS.home, match: ["/dashboard", "/activity", "/statements", "/cards"] },
     { href: "/deposit", label: "Deposit", icon: ICONS.deposit, match: ["/deposit", "/withdraw"] },
     { href: "/transfer", label: "Pay & Transfer", icon: ICONS.payments, match: ["/transfer", "/send", "/bills"] },
-    { href: "/budget", label: "Explore", icon: ICONS.compass, match: ["/budget", "/goals", "/credit"] },
+    { href: "/explore", label: "Explore", icon: ICONS.compass, match: ["/explore", "/budget", "/goals", "/credit"] },
   ].filter((t) => can(t.href));
   // Only the pages this customer can use appear in the menu.
   const groups = NAV_GROUPS.map((g) => ({ ...g, items: g.items.filter((n) => can(n.href)) })).filter((g) => g.items.length > 0);

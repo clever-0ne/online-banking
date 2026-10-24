@@ -1191,3 +1191,35 @@ h2 { font-weight: 600; font-size: 1.2rem; }
   .tabbar a[aria-current="page"] { color: var(--accent); box-shadow: none; }
   .tabbar a[aria-current="page"] svg { stroke-width: 2.2; }
 }
+
+/* Bold balances and greeting; plain background on phones (no fade at the top). */
+.acct-amount, .greet-total b, .acct-bal, .score-line b { font-weight: 700 !important; }
+.greet-band h1 { font-weight: 700 !important; }
+@media (max-width: 760px) {
+  .app:has(.summary), :root[data-theme="dark"] .app:has(.summary) { background: var(--bg) !important; }
+  .app .topbar.mast { background: var(--surface) !important; border-bottom: 1px solid var(--line); }
+  .greet-band h1 { font-size: 1.9rem; }
+}
+
+/* ---------- Explore: markets, news, features ---------- */
+.mk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; }
+.mk-tile { display: grid; gap: 4px; padding: 14px 16px; background: var(--surface); border-radius: 10px; box-shadow: var(--card-shadow); }
+.mk-name { font-size: 0.85rem; font-weight: 700; color: var(--head); }
+.mk-price { font-size: 1.35rem; font-weight: 700; color: var(--head); }
+.mk-chg { font-size: 0.85rem; font-weight: 700; }
+.mk-split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.mk-list { list-style: none; margin: 0; padding: 0; }
+.mk-list li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; }
+.mk-list li + li { border-top: 1px solid var(--line); }
+.mk-list .num { font-weight: 700; color: var(--head); }
+.mk-right { display: grid; justify-items: end; gap: 2px; }
+.news-list { list-style: none; margin: 0; padding: 0; }
+.news-list li + li { border-top: 1px solid var(--line); }
+.news-list a { display: grid; gap: 4px; padding: 14px 20px; text-decoration: none; color: inherit; }
+.news-list a:hover b { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+.news-list b { font-weight: 600; line-height: 1.35; }
+.feat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.feat-card { display: grid; gap: 8px; align-content: start; padding: 20px; background: var(--surface); border-radius: 10px; box-shadow: var(--card-shadow); text-decoration: none; color: inherit; }
+.feat-card:hover b { color: var(--accent); }
+.feat-card .quick-ico { width: 42px; height: 42px; }
+@media (max-width: 760px) { .mk-split { grid-template-columns: 1fr; } .mk-grid { grid-template-columns: 1fr 1fr; } .news-list a { padding: 12px 14px; } }

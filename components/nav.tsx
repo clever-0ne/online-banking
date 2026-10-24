@@ -32,6 +32,7 @@ export const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
   {
     title: "Plan & track",
     items: [
+      { href: "/explore", label: "Explore", icon: icon(<><circle cx="12" cy="12" r="9" /><path d="M15.5 8.5l-2 5-5 2 2-5z" /></>) },
       { href: "/budget", label: "Budget", icon: icon(<><path d="M12 3v9l7 4" /><circle cx="12" cy="12" r="9" /></>) },
       { href: "/goals", label: "Savings goals", icon: icon(<><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="5" /><circle cx="12" cy="12" r="1" /></>) },
       { href: "/credit", label: "Credit score", icon: icon(<><path d="M4 16a8 8 0 0 1 16 0" /><path d="M12 16l4-5" /></>) },

@@ -10,7 +10,7 @@ import { canUse } from "@/lib/server/permissions";
 import { SESSION_COOKIE, verifyToken } from "@/lib/server/session";
 import { DENIED_PATH, pageOf } from "@/lib/pages";
 
-const PROTECTED = ["/dashboard", "/activity", "/statements", "/transfer", "/send", "/bills", "/deposit", "/withdraw", "/budget", "/goals", "/credit", "/cards", "/alerts", "/profile"];
+const PROTECTED = ["/dashboard", "/activity", "/statements", "/transfer", "/send", "/bills", "/deposit", "/withdraw", "/explore", "/budget", "/goals", "/credit", "/cards", "/alerts", "/profile"];
 const AUTH_PAGES = ["/login", "/signup"];
 const under = (path: string, prefix: string) => path === prefix || path.startsWith(prefix + "/");
 
