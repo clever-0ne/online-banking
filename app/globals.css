@@ -1609,3 +1609,71 @@ html:has(.summary) { background: var(--band) !important; }
   .greet-band { padding-bottom: 14px !important; }
 }
 .app:has(.summary) .mast .brand svg { border-radius: 8px; box-shadow: 0 0 0 1.5px rgb(255 255 255 / .55); }
+
+/* =====================================================================================================
+   Brighter bank blue, and the blue band on every page: the header is blue everywhere, and each page's
+   title block continues it full-width, with the first cards overlapping its lower edge.
+   ===================================================================================================== */
+:root {
+  --accent: #1557C0; --accent-hover: #0F469E; --accent-soft: #E8F0FC; --icon-bg: #E8F0FC;
+  --brand: #0B3D91; --brand-deep: #082E6E; --brand-line: #2E7FE6; --rule: #1557C0;
+  --band: #0A3483; --band-2: #1A66D1;
+}
+:root[data-theme="dark"] { --accent: #6EA8FF; --accent-hover: #93BEFF; --accent-soft: #15284A; --icon-bg: #15284A; --band: #0A2559; --band-2: #12459A; --rule: #6EA8FF; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --accent: #6EA8FF; --accent-hover: #93BEFF; --accent-soft: #15284A; --icon-bg: #15284A; --band: #0A2559; --band-2: #12459A; --rule: #6EA8FF; } }
+.btn:not(.ghost):not(.danger), .so-btn:not(.ghost):not(:disabled) { background: var(--accent); color: #fff; }
+.btn:not(.ghost):not(.danger):hover, .so-btn:not(.ghost):not(:disabled):hover { background: var(--accent-hover); }
+
+.app { overflow-x: clip; }
+html:has(.app) { background: var(--band) !important; }
+@media (max-width: 760px) { body:has(.app)::before { background: var(--band) !important; } }
+
+/* Header: blue on every page, white text. */
+.app:not(:has(.summary)) .topbar.mast { background: var(--band) !important; }
+.app .mast .brand, .app .mast .icon-btn, .app .mn-top, .app .mast-signoff { color: #fff !important; }
+.app .mast .icon-btn:hover, .app .mn-top:hover, .app .mn-group:focus-within .mn-top { background: rgb(255 255 255 / .12); }
+.app .mn-top[aria-current] { border-bottom-color: #fff; }
+.app .mast .avatar-link .avatar { background: rgb(255 255 255 / .16); color: #fff; }
+.app .mast .icon-btn .dot { box-shadow: 0 0 0 2px var(--band); }
+.app .mast .brand svg { border-radius: 8px; box-shadow: 0 0 0 1.5px rgb(255 255 255 / .55); }
+
+/* Page title blocks become the band: full width, white text, extra room below for the cards to overlap. */
+.app:not(:has(.summary)) main .wrap > .head:first-child {
+  position: relative; margin: -28px calc(50% - 50vw) 0; padding: 26px calc(50vw - 50%) 72px;
+  background:
+    radial-gradient(520px 240px at 88% 0%, rgb(120 180 255 / .32), transparent 70%),
+    var(--diamonds-navy) top center / 200px 200px repeat-x,
+    linear-gradient(160deg, var(--band) 0%, var(--band-2) 100%);
+}
+.app main .wrap > .head:first-child h1 { color: #fff !important; }
+.app main .wrap > .head:first-child .muted, .app main .wrap > .head:first-child p { color: rgb(255 255 255 / .78) !important; }
+.app main .wrap > .head:first-child .btn.ghost { background: rgb(255 255 255 / .12); border-color: rgb(255 255 255 / .7); color: #fff; }
+.app main .wrap > .head:first-child .input { background: #fff; }
+.app main .wrap > .head:first-child + :is(.panel, .grid-2, .tiles) { position: relative; margin-top: -64px; }
+.app main .wrap > .head:first-child + .seg { position: relative; margin-top: -60px; background: transparent !important; border-bottom-color: rgb(255 255 255 / .25) !important; }
+.app main .wrap > .head:first-child + .seg button { color: rgb(255 255 255 / .75) !important; }
+.app main .wrap > .head:first-child + .seg button[aria-pressed="true"] { color: #fff !important; border-bottom-color: #fff !important; }
+.app main .wrap > .head:first-child + .seg + * { margin-top: 6px; }
+
+/* Dashboard band: same brighter blue with a lighter glow. */
+html body .app:has(.summary) {
+  background:
+    radial-gradient(560px 280px at 88% 0%, rgb(120 180 255 / .32), transparent 70%) top / 100% var(--band-h) no-repeat,
+    var(--diamonds-navy) top center / 200px 200px repeat-x,
+    linear-gradient(160deg, var(--band) 0%, var(--band-2) 100%) top / 100% var(--band-h) no-repeat,
+    var(--bg) !important;
+}
+:root { --diamonds-navy: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Cpath d='M100 0L200 100L100 200L0 100Z' fill='white' fill-opacity='.05'/%3E%3C/svg%3E"); }
+
+@media (max-width: 760px) {
+  .app:not(:has(.summary)) main .wrap > .head:first-child { margin-top: -18px; padding-top: 18px; padding-bottom: 60px; }
+  .app main .wrap > .head:first-child + :is(.panel, .grid-2, .tiles) { margin-top: -52px; }
+  .app main .wrap > .head:first-child + .seg { margin-top: -50px; }
+}
+
+/* Inner pages: the header sits on the title band (no seam), and the card pictures use the bank blues. */
+.app:has(main .wrap > .head:first-child) .topbar.mast { background: transparent !important; position: relative; z-index: 2; }
+.app:not(:has(.summary)) main .wrap > .head:first-child { margin-top: calc(-28px - var(--topbar-h)) !important; padding-top: calc(26px + var(--topbar-h)) !important; z-index: 0; }
+@media (max-width: 760px) { .app:not(:has(.summary)) main .wrap > .head:first-child { margin-top: calc(-18px - var(--topbar-h)) !important; padding-top: calc(18px + var(--topbar-h)) !important; } }
+.bankcard.debit { background: radial-gradient(260px 160px at 90% 0%, rgb(120 180 255 / .35), transparent 70%), linear-gradient(150deg, #0A3483, #1A66D1) !important; }
+.bankcard.credit { background: linear-gradient(150deg, #0B1B33, #1F3557) !important; }
