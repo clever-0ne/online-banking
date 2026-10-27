@@ -1562,3 +1562,50 @@ body:has(.app), body:has(.so), body:has(.auth) { background: var(--bg) !importan
 .acct-card .acct-total { border: 0 !important; padding: 0 !important; justify-content: flex-end; flex-wrap: nowrap; }
 .acct-card .acct-row { flex-direction: column; justify-content: flex-start; align-items: flex-start; text-align: left; gap: 4px; }
 .acct-card .acct-row:hover b { text-decoration: none; }
+
+/* =====================================================================================================
+   Dashboard: a navy welcome band behind the header and greeting, with the cards overlapping its lower
+   edge; icons on each account and a badge for each payee.
+   ===================================================================================================== */
+:root { --band: #0B2E59; --band-2: #0F4C81; --band-h: 330px; }
+@media (max-width: 760px) { :root { --band-h: 210px; } }
+html body .app:has(.summary) {
+  background:
+    radial-gradient(520px 260px at 88% 0%, rgb(95 163 222 / .28), transparent 70%) top / 100% var(--band-h) no-repeat,
+    var(--diamonds-navy) top center / 200px 200px repeat-x,
+    linear-gradient(160deg, var(--band) 0%, var(--band-2) 100%) top / 100% var(--band-h) no-repeat,
+    var(--bg) !important;
+}
+:root { --diamonds-navy: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Cpath d='M100 0L200 100L100 200L0 100Z' fill='white' fill-opacity='.035'/%3E%3C/svg%3E"); }
+html:has(.summary) { background: var(--band) !important; }
+@media (max-width: 760px) { body:has(.summary)::before { background: var(--band) !important; } }
+:root[data-theme="dark"] { --band: #0A1F3B; --band-2: #0D3560; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --band: #0A1F3B; --band-2: #0D3560; } }
+
+/* Header and greeting in white on the band. */
+.app:has(.summary) .mast .brand, .app:has(.summary) .mast .icon-btn, .app:has(.summary) .mn-top, .app:has(.summary) .mast-signoff { color: #fff !important; }
+.app:has(.summary) .mast .icon-btn:hover, .app:has(.summary) .mn-top:hover, .app:has(.summary) .mn-group:focus-within .mn-top { background: rgb(255 255 255 / .1); }
+.app:has(.summary) .mn-top[aria-current] { border-bottom-color: #fff; }
+.app:has(.summary) .mast .avatar-link .avatar { background: rgb(255 255 255 / .16); color: #fff; }
+.app:has(.summary) .mast .icon-btn .dot { box-shadow: 0 0 0 2px var(--band); }
+.app:has(.summary) .greet-band h1 { color: #fff !important; }
+.app:has(.summary) .greet-band p { color: rgb(255 255 255 / .72); }
+.summary-grid { position: relative; }
+
+/* Cards on the dashboard get a slightly deeper shadow so they lift off the band. */
+.summary .acct-card, .summary .act-card, .summary .summary-side .panel, .summary .panel.flush { box-shadow: 0 0 0 1px rgb(15 40 80 / .05), 0 10px 30px -14px rgb(11 46 89 / .28) !important; }
+
+/* Account icons. */
+.acct-ico { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; background: var(--icon-bg); color: var(--accent); margin-bottom: 8px; }
+
+/* Payee badges in recent activity. */
+.tx-who { display: flex; align-items: center; gap: 12px; }
+.tx-av { width: 38px; height: 38px; flex: none; border-radius: 50%; display: grid; place-items: center; background: var(--surface-2); color: var(--head); font-weight: 600; font-size: 0.95rem; box-shadow: inset 0 0 0 1px var(--line); }
+.tx-av.in { background: var(--pos-soft); color: var(--pos); box-shadow: none; }
+
+@media (max-width: 760px) {
+  .summary-grid { background: transparent !important; padding-top: 0 !important; }
+  .acct-ico { width: 34px; height: 34px; border-radius: 10px; margin-bottom: 6px; }
+  .greet-band { padding-bottom: 14px !important; }
+}
+.app:has(.summary) .mast .brand svg { border-radius: 8px; box-shadow: 0 0 0 1.5px rgb(255 255 255 / .55); }

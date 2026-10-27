@@ -9,6 +9,14 @@ import { ICONS } from "@/components/nav";
 import { daysUntil, fmt, fromISO, longDate, mask } from "@/lib/format";
 import { acct, alertFeed, available, bandOf, scheduledLabel, sortedTx } from "@/lib/logic";
 
+// Small line icons for each kind of account.
+const svg = (d: React.ReactNode) => <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{d}</svg>;
+const ACCT_ICONS: Record<string, React.ReactNode> = {
+  checking: svg(<><rect x="3" y="6" width="18" height="13" rx="2.5" /><path d="M3 10h18M16 14.5h2" /></>),
+  savings: svg(<><path d="M4 17l5-5 4 4 7-8" /><path d="M15 8h5v5" /></>),
+  credit: svg(<><rect x="2.5" y="5" width="19" height="14" rx="2.5" /><path d="M2.5 9.5h19M6 15h4" /></>),
+};
+
 const shortDate = (iso: string) => fromISO(iso).toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "2-digit" });
 
 export default function DashboardPage() {
@@ -67,12 +75,14 @@ export default function DashboardPage() {
             <div className="acct-rows">
               {cash.map((a) => (
                 <Link key={a.id} href={go("/activity")} className="acct-row">
+                  <span className="acct-ico">{a.kind === "savings" ? ACCT_ICONS.savings : ACCT_ICONS.checking}</span>
                   <span className="acct-label" translate="no">{a.name.toUpperCase()} {mask(a.last4)}</span>
                   <span className="acct-amount num">{fmt(available(state, a.id))}</span>
                   <span className="acct-cap">Available balance{a.apy ? ` · ${a.apy}% APY` : ""}{a.held ? ` · ${fmt(a.held)} on hold` : ""}</span>
                 </Link>
               ))}
               <Link href={go("/cards")} className="acct-row">
+                <span className="acct-ico">{ACCT_ICONS.credit}</span>
                 <span className="acct-label" translate="no">{cc.name.toUpperCase()} {mask(cc.last4)}</span>
                 <span className={`acct-amount num${owed > 0 ? " owed" : ""}`}>{fmt(owed)}</span>
                 <span className="acct-cap">Current balance · {fmt(available(state, "cc"))} available credit</span>
@@ -120,8 +130,10 @@ export default function DashboardPage() {
                     <tr key={t.id}>
                       <td className="tx-date">{shortDate(t.date)}</td>
                       <td>
-                        <b>{t.payee}</b>
-                        <span className="muted small block">{name(t.acct)}{t.status === "pending" ? " · Pending" : ""}</span>
+                        <span className="tx-who">
+                          <span className={`tx-av${t.amount > 0 ? " in" : ""}`} aria-hidden="true">{t.payee.replace(/[^A-Za-z0-9]/g, "").slice(0, 1).toUpperCase() || "•"}</span>
+                          <span><b>{t.payee}</b><span className="muted small block">{name(t.acct)}{t.status === "pending" ? " · Pending" : ""}</span></span>
+                        </span>
                       </td>
                       <td className={`r num ${t.amount > 0 ? "pos" : "neg"}`}>{t.amount > 0 ? "+" : "−"}{fmt(Math.abs(t.amount))}</td>
                     </tr>
