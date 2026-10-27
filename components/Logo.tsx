@@ -10,9 +10,9 @@ export function LogoMark({ size = 28, animated = false }: { size?: number; anima
     <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden="true" className={animated ? "logo-anim" : undefined}>
       <defs>
         <linearGradient id={`ag${id}`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#4B3FE0" />
-          <stop offset=".55" stopColor="#7C4DF2" />
-          <stop offset="1" stopColor="#C46BD6" />
+          <stop offset="0" stopColor="#0B2E59" />
+          <stop offset=".55" stopColor="#0F4C81" />
+          <stop offset="1" stopColor="#1F6FB2" />
         </linearGradient>
       </defs>
       <rect width="64" height="64" rx="16" fill={`url(#ag${id})`} />

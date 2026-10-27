@@ -5,10 +5,10 @@
   --wf-muted: #64647a;
   --wf-line: #e3e3ec;
   --wf-tint: #f4f4f8;
-  --wf-brand: #3127b4;
-  --wf-brand-deep: #241c8c;
-  --wf-accent: #7c4df2;
-  --wf-accent-2: #c46bd6;
+  --wf-brand: #0B2E59;
+  --wf-brand-deep: #0A2A50;
+  --wf-accent: #2F7BC4;
+  --wf-accent-2: #5FA3DE;
   --wf-pos: #12805c;
   color-scheme: light;
   position: relative;
@@ -194,7 +194,7 @@
 
 /* ---------- Floating download button + install steps ---------- */
 .wf-fab { position: fixed; right: max(20px, env(safe-area-inset-right, 0px)); bottom: max(20px, env(safe-area-inset-bottom, 0px)); z-index: 60; display: flex; align-items: flex-start; animation: wf-rise .4s ease-out .8s both; }
-.wf-fab-btn { display: flex; align-items: center; gap: 12px; padding: 10px 20px 10px 10px; border: 0; border-radius: 999px; background: var(--wf-brand); color: #fff; font: inherit; text-align: left; cursor: pointer; box-shadow: 0 16px 36px -12px rgb(36 28 140 / .65), 0 2px 6px rgb(20 16 60 / .2); transition: transform .15s, background-color .15s; }
+.wf-fab-btn { display: flex; align-items: center; gap: 12px; padding: 10px 20px 10px 10px; border: 0; border-radius: 999px; background: var(--wf-brand); color: #fff; font: inherit; text-align: left; cursor: pointer; box-shadow: 0 16px 36px -12px rgb(11 46 89 / .65), 0 2px 6px rgb(20 16 60 / .2); transition: transform .15s, background-color .15s; }
 .wf-fab-btn:hover { background: var(--wf-brand-deep); transform: translateY(-2px); }
 .wf-fab-btn img { border-radius: 50%; background: #fff; padding: 2px; width: 40px; height: 40px; }
 .wf-fab-btn span { display: grid; line-height: 1.25; }

@@ -44,14 +44,14 @@ export function renderEmail(m: EmailMessage, base = siteUrl()): { html: string; 
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f8;padding:24px 12px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
 <tr><td align="center">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e3e3ec;">
-<tr><td style="background:#3127b4;padding:18px 28px;border-bottom:4px solid #7c4df2;">
+<tr><td style="background:#0B2E59;padding:18px 28px;border-bottom:4px solid #2F7BC4;">
 <table role="presentation" cellpadding="0" cellspacing="0"><tr>${logo ? `<td style="padding-right:12px">${logo}</td>` : ""}<td style="color:#ffffff;font-size:20px;font-weight:800;letter-spacing:-0.01em">Anchor Bank</td></tr></table>
 </td></tr>
 <tr><td style="padding:32px 28px 8px;color:#17171f;">
 <h1 style="margin:0 0 16px;font-size:24px;line-height:1.25;color:#17171f;">${esc(heading)}</h1>
 ${m.paragraphs.map((p) => `<p style="margin:0 0 14px;font-size:16px;line-height:1.55;color:#3f3f52;">${esc(p)}</p>`).join("\n")}
 ${m.details?.length ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:8px 0 18px;background:#f4f4f8;border-radius:12px;">${m.details.map(([k, v]) => `<tr><td style="padding:10px 16px;font-size:14px;color:#64647a;">${esc(k)}</td><td align="right" style="padding:10px 16px;font-size:14px;font-weight:700;color:#17171f;">${esc(v)}</td></tr>`).join("")}</table>` : ""}
-${link ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 18px;"><tr><td style="border-radius:999px;background:#3127b4;"><a href="${esc(link)}" style="display:inline-block;padding:13px 26px;font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:999px;">${esc(m.button!.label)}</a></td></tr></table>` : ""}
+${link ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 18px;"><tr><td style="border-radius:999px;background:#0B2E59;"><a href="${esc(link)}" style="display:inline-block;padding:13px 26px;font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:999px;">${esc(m.button!.label)}</a></td></tr></table>` : ""}
 ${m.note ? `<p style="margin:0 0 14px;font-size:13px;line-height:1.5;color:#64647a;">${esc(m.note)}</p>` : ""}
 </td></tr>
 <tr><td style="padding:18px 28px 26px;border-top:1px solid #e3e3ec;font-size:12px;line-height:1.5;color:#8a8aa0;">

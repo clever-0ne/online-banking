@@ -58,25 +58,32 @@ export default function DashboardPage() {
       <div className="summary-grid">
         <div className="summary-main">
           <h2 className="sec-title">Accounts</h2>
-          <div className="acct-tiles">
-            {cash.map((a) => (
-              <Link key={a.id} href={go("/activity")} className="acct-tile">
-                <span className="acct-label" translate="no">{a.name.toUpperCase()} {mask(a.last4)}</span>
-                <span className="acct-amount num">{fmt(available(state, a.id))}</span>
-                <span className="acct-cap">Available balance{a.apy ? ` · ${a.apy}% APY` : ""}{a.held ? ` · ${fmt(a.held)} on hold` : ""}</span>
+          {/* All balances in one card: a row per account, the total at the top, card payment at the bottom. */}
+          <section className="acct-card">
+            <div className="acct-card-head">
+              <h2>Accounts</h2>
+              <span className="acct-total"><span>Total available</span><b className="num">{fmt(cashTotal)}</b></span>
+            </div>
+            <div className="acct-rows">
+              {cash.map((a) => (
+                <Link key={a.id} href={go("/activity")} className="acct-row">
+                  <span className="acct-label" translate="no">{a.name.toUpperCase()} {mask(a.last4)}</span>
+                  <span className="acct-amount num">{fmt(available(state, a.id))}</span>
+                  <span className="acct-cap">Available balance{a.apy ? ` · ${a.apy}% APY` : ""}{a.held ? ` · ${fmt(a.held)} on hold` : ""}</span>
+                </Link>
+              ))}
+              <Link href={go("/cards")} className="acct-row">
+                <span className="acct-label" translate="no">{cc.name.toUpperCase()} {mask(cc.last4)}</span>
+                <span className={`acct-amount num${owed > 0 ? " owed" : ""}`}>{fmt(owed)}</span>
+                <span className="acct-cap">Current balance · {fmt(available(state, "cc"))} available credit</span>
               </Link>
-            ))}
-            <Link href={go("/cards")} className="acct-tile">
-              <span className="acct-label" translate="no">{cc.name.toUpperCase()} {mask(cc.last4)}</span>
-              <span className={`acct-amount num${owed > 0 ? " owed" : ""}`}>{fmt(owed)}</span>
-              <span className="acct-cap">Current balance · {fmt(available(state, "cc"))} available credit</span>
-              <span className="acct-strip">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" /></svg>
-                <span>{owed > 0 && cc.dueDate ? <><b className="num">{fmt(cc.minDue ?? 0)}</b> due {fromISO(cc.dueDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</> : <><b className="num">{fmt(available(state, "cc"))}</b> available to spend</>}</span>
-                <span className="acct-chev" aria-hidden="true">›</span>
-              </span>
+            </div>
+            <Link href={go("/cards")} className="acct-strip">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" /></svg>
+              <span>{owed > 0 && cc.dueDate ? <>Card payment: <b className="num">{fmt(cc.minDue ?? 0)}</b> minimum due {fromISO(cc.dueDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</> : <>Card: <b className="num">{fmt(available(state, "cc"))}</b> available to spend</>}</span>
+              <span className="acct-chev" aria-hidden="true">›</span>
             </Link>
-          </div>
+          </section>
 
           {can("/deposit") && <Link href="/deposit" className="add-link">{ICONS.plusCircle}<span>Make a deposit</span></Link>}
 
